@@ -12,7 +12,7 @@ import java.util.concurrent.BlockingQueue;
  * @author fredo
  * 
  */
-public class CollectorStage<Type> extends Stage<Type, Type> {
+public class CollectorStage<Type> extends ContextFreeStage<Type, Type> {
 // NOTE this would be a good place to apply filtering and sorting
 	
 	public CollectorStage(){

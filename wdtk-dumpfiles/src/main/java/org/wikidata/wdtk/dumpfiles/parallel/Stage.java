@@ -2,8 +2,6 @@ package org.wikidata.wdtk.dumpfiles.parallel;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 
@@ -16,13 +14,13 @@ import java.util.concurrent.Callable;
  * no more elements to process. It then will process all remaining elements and
  * return a StageResult.
  * 
- * @author fredo
+ * @author Fredo Erxleben
  * 
  */
 public abstract class Stage<InType, OutType> implements Callable<StageResult> {
 
 	protected boolean running = true;
-	private boolean finished = false;
+	protected boolean finished = false;
 	protected int waitTime = 100; // in usec
 
 	protected StageResult result;
@@ -49,34 +47,7 @@ public abstract class Stage<InType, OutType> implements Callable<StageResult> {
 	
 	public abstract OutType processElement(InType element);
 
-	/**
-	 * The default implementation processes the input only element-wise
-	 */
 	@Override
-	public StageResult call() throws Exception {
-		List<InType> currentStep = new LinkedList<>();
-
-		while (this.running) {
-			// get all the input for the steps
-			for (BlockingQueue<InType> producer : this.producers) {
-				producer.drainTo(currentStep);
-			}
-			// process the elements
-			while (!currentStep.isEmpty()) {
-				OutType stepResult = this.processElement(currentStep.remove(0));
-				// distribute result to all consumers
-				for (BlockingQueue<OutType> consumer : this.consumers) {
-					consumer.put(stepResult);
-				}
-			}
-			
-			// wait for new input
-			synchronized(this){
-				wait(this.waitTime);
-			}
-		}
-		this.finished = true;
-		return this.result;
-	}
+	public abstract StageResult call() throws Exception;
 
 }

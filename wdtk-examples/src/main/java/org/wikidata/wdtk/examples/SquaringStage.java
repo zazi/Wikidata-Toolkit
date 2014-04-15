@@ -2,10 +2,10 @@ package org.wikidata.wdtk.examples;
 
 import java.util.LinkedList;
 
+import org.wikidata.wdtk.dumpfiles.parallel.ContextFreeStage;
 import org.wikidata.wdtk.dumpfiles.parallel.CounterStageResult;
-import org.wikidata.wdtk.dumpfiles.parallel.Stage;
 
-public class SquaringStage extends Stage<Integer, Integer> {
+public class SquaringStage extends ContextFreeStage<Integer, Integer> {
 
 	SquaringStage(){
 		this.result = new CounterStageResult();
