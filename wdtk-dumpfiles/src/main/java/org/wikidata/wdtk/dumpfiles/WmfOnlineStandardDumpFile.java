@@ -49,6 +49,7 @@ public class WmfOnlineStandardDumpFile extends WmfDumpFile {
 	final WebResourceFetcher webResourceFetcher;
 	final DirectoryManager dumpfileDirectoryManager;
 	final DumpContentType dumpContentType;
+	
 
 	/**
 	 * Constructor.
@@ -84,7 +85,9 @@ public class WmfOnlineStandardDumpFile extends WmfDumpFile {
 	@Override
 	public InputStream getDumpFileStream() throws IOException {
 
-		prepareDumpFile();
+		if(!this.fetchIsDone()){
+			prepareDumpFile();
+		}
 
 		String fileName = WmfDumpFile.getDumpFileName(this.dumpContentType,
 				this.projectName, this.dateStamp);

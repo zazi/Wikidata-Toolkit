@@ -1,13 +1,13 @@
 package org.wikidata.wdtk.dumpfiles.parallel;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.LinkedList;
-import java.util.concurrent.BlockingQueue;
 
 import org.wikidata.wdtk.dumpfiles.MwDumpFile;
 
-public class FileFetchStage extends ContextFreeStage<MwDumpFile, InputStream> {
+public class FileFetchStage extends ContextFreeStage<MwDumpFile, MwDumpFile> {
+	
+	// TODO maybe later stages need more context information?
 	
 	public FileFetchStage(){
 		this.consumers = new LinkedList<>();
@@ -24,16 +24,18 @@ public class FileFetchStage extends ContextFreeStage<MwDumpFile, InputStream> {
 	}
 	
 	@Override
-	public InputStream processElement(MwDumpFile element) {
+	public MwDumpFile processElement(MwDumpFile element) {
 		
-		// TODO unclutter this call into several useful calls
 		System.out.println("Processing " + element.getProjectName() + " :: " + element.getDateStamp());
 		
 		try {
-			InputStream stream = element.getDumpFileStream(); 
+			// TODO unclutter this call into several useful calls
+			// this downloads the element if neccessary
+			element.prepareDumpFile(); 
+			
 			((CounterStageResult) this.result).increment();
 			System.out.println("done");
-			return stream;
+			return element;
 			
 		} catch (IOException e) {
 			e.printStackTrace();

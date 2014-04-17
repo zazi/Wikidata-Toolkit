@@ -75,7 +75,10 @@ class WmfOnlineDailyDumpFile extends WmfDumpFile {
 
 	@Override
 	public InputStream getDumpFileStream() throws IOException {
+		
+		if(!this.fetchIsDone()){
 		prepareDumpFile();
+		}
 
 		String fileName = WmfDumpFile.getDumpFileName(DumpContentType.DAILY,
 				this.projectName, this.dateStamp);

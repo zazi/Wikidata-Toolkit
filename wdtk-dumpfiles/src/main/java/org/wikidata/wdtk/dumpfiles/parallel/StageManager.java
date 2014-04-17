@@ -1,7 +1,10 @@
 package org.wikidata.wdtk.dumpfiles.parallel;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -19,12 +22,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class StageManager {
 
 	// TODO the whole life cycle should be managed by this class
-	// TODO maybe the manager shoul get its own thread
+	// TODO maybe the manager should get its own thread
+	// TODO logging support
 
 	ExecutorService executor = Executors.newCachedThreadPool();
-
-	List<Stage<?, ?>> stages = new LinkedList<>();
-	List<Future<StageResult>> futures = new LinkedList<>();
+	List<Stage<?, ?>> scheduledStages = new LinkedList<>();
+	Map<Stage<?, ?>, Future<StageResult>> runningStages = new HashMap<>();
 	List<StageResult> results = new LinkedList<>();
 	List<BlockingQueue<?>> connectors = new LinkedList<>();
 
@@ -54,7 +57,7 @@ public class StageManager {
 	 */
 	public void submitStage(Stage<?, ?> toLaunch) {
 
-		stages.add(toLaunch);
+		this.scheduledStages.add(toLaunch);
 	}
 
 	/**
@@ -62,9 +65,9 @@ public class StageManager {
 	 * to the
 	 */
 	public void run() {
-		for (Stage<?, ?> stage : this.stages) {
+		for (Stage<?, ?> stage : this.scheduledStages) {
 			Future<StageResult> result = executor.submit(stage);
-			this.futures.add(result);
+			this.runningStages.put(stage, result);
 		}
 	}
 
@@ -74,13 +77,14 @@ public class StageManager {
 	 * @return true, if no more results are outstanding.
 	 */
 	public boolean collectResults() {
-		List<Future<StageResult>> toRemove = new LinkedList<>();
+		List<Stage<?, ?>> toRemove = new LinkedList<>();
 
-		for (Future<StageResult> future : this.futures) {
-			if (future.isDone()) {
+		for (Entry<Stage<?, ?>, Future<StageResult>> future : this.runningStages
+				.entrySet()) {
+			if (future.getValue().isDone()) {
 				try {
-					toRemove.add(future);
-					this.results.add(future.get());
+					toRemove.add(future.getKey());
+					this.results.add(future.getValue().get());
 					System.out.println("Collecting Result");
 				} catch (InterruptedException | ExecutionException e) {
 					e.printStackTrace();
@@ -88,22 +92,25 @@ public class StageManager {
 			}
 		}
 
-		if (!toRemove.isEmpty()) {
-			this.futures.removeAll(toRemove);
+		for (Stage<?, ?> key : toRemove) {
+			this.runningStages.remove(key);
 		}
 
-		return this.futures.isEmpty();
+		return this.runningStages.isEmpty();
 	}
 
 	/**
 	 * The StageResults are kept for evaluation. The Futures and Stages and
-	 * connecting queues will be cleared.
+	 * connecting queues will be cleared. All scheduled stages are discarded.
 	 */
 	public void shutdown() {
 		System.out.println("Shutting down manager");
 		this.executor.shutdown();
 
-		for (Stage<?, ?> stage : this.stages) {
+		// tell all stages to finish gracefully
+		// but do not await the results just yet, because they might take time
+		// to finish
+		for (Stage<?, ?> stage : this.runningStages.keySet()) {
 			stage.finish();
 		}
 
@@ -111,18 +118,34 @@ public class StageManager {
 			queue.clear();
 		}
 
-		for (Future<StageResult> future : this.futures) {
+		for (Future<StageResult> future : this.runningStages.values()) {
 			try {
 				this.results.add(future.get());
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
 		}
-		this.stages.clear();
-		this.futures.clear();
+		this.scheduledStages.clear();
+		this.runningStages.clear();
 		this.connectors.clear();
 	}
 
+	/**
+	 * Checks if a stage was running, but the future has not yet been collected.
+	 * 
+	 * @param stage
+	 *            the stage to be checked for
+	 * @return true if the stage was running and is done; false otherwise
+	 */
+	public boolean canBeCollected(Stage<?, ?> stage) {
+		return (this.runningStages.containsKey(stage) && this.runningStages
+				.get(stage).isDone());
+	}
+
+	/**
+	 * 
+	 * @return all stage results that were already collected
+	 */
 	public List<StageResult> getStageResults() {
 		return this.results;
 	}
