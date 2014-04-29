@@ -5,12 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class manages the life cycle of all processing stages and the
@@ -19,17 +21,71 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author Fredo Erxleben
  * 
  */
-public class StageManager {
+public class StageManager implements Callable<String> {
+	// XXX the generic type of the Callable-Interface is not fixed
+	// See what will be better fitting…
 
-	// TODO the whole life cycle should be managed by this class
-	// TODO maybe the manager should get its own thread
-	// TODO logging support
+	// TODO the manager shut down, once all stages are done, but should be able
+	// to be restarted later again via run()
 
-	ExecutorService executor = Executors.newCachedThreadPool();
-	List<Stage<?, ?>> scheduledStages = new LinkedList<>();
-	Map<Stage<?, ?>, Future<StageResult>> runningStages = new HashMap<>();
-	List<StageResult> results = new LinkedList<>();
-	List<BlockingQueue<?>> connectors = new LinkedList<>();
+	private ExecutorService executor = Executors.newCachedThreadPool();
+	private List<Stage<?, ?>> scheduledStages = new LinkedList<>();
+	private Map<Stage<?, ?>, Future<StageResult>> runningStages = new HashMap<>();
+	private List<StageResult> results = new LinkedList<>();
+	private Future<String> stageManagerFuture;
+	private boolean running = false;
+
+	private Logger logger = LoggerFactory.getLogger(StageManager.class);
+
+	public StageManager() {
+		this.stageManagerFuture = this.executor.submit(this);
+	}
+
+	/**
+	 * Runs the StageManagerThread. Internally the thread just waits some time
+	 * and then checks if there are Futures that can be collected yet. Once the
+	 */
+	@Override
+	public String call() throws Exception {
+
+		logger.info("Stage manager running");
+		// start out in setup mode, waiting for a signal to run
+		synchronized (this) {
+			try {
+				this.wait();
+			} catch (InterruptedException e) {
+			}
+		}
+
+		// the working loop
+		while (this.running) {
+
+			this.collectResults();
+
+			synchronized (this) {
+				try {
+					// TODO move wait time into a field
+					this.wait(10000);
+				} catch (InterruptedException e) {
+				}
+			}
+		}
+
+		this.scheduledStages.clear();
+
+		// get all the outstanding results
+		// before quitting
+		for (Future<StageResult> future : this.runningStages.values()) {
+			try {
+				this.results.add(future.get());
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+		this.runningStages.clear();
+
+		return null;
+	}
 
 	/**
 	 * 
@@ -37,17 +93,11 @@ public class StageManager {
 	 * @param receiver
 	 * @return
 	 */
-	public <CommonType> BlockingQueue<CommonType> connectStages(
+	public synchronized <CommonType> void connectStages(
 			Stage<?, CommonType> sender, Stage<CommonType, ?> receiver) {
 
-		BlockingQueue<CommonType> connectionQueue = new LinkedBlockingQueue<CommonType>();
-
-		sender.addConsumer(connectionQueue);
-		receiver.addProducer(connectionQueue);
-
-		this.connectors.add(connectionQueue);
-
-		return connectionQueue;
+		sender.addConsumer(receiver);
+		receiver.addProducer(sender);
 	}
 
 	/**
@@ -55,7 +105,7 @@ public class StageManager {
 	 * 
 	 * @param toLaunch
 	 */
-	public void submitStage(Stage<?, ?> toLaunch) {
+	public synchronized void submitStage(Stage<?, ?> toLaunch) {
 
 		this.scheduledStages.add(toLaunch);
 	}
@@ -64,11 +114,16 @@ public class StageManager {
 	 * Executes all earlier submitted stages. This hands the stages threads over
 	 * to the
 	 */
-	public void run() {
+	public synchronized void run() {
 		for (Stage<?, ?> stage : this.scheduledStages) {
 			Future<StageResult> result = executor.submit(stage);
 			this.runningStages.put(stage, result);
 		}
+
+		if (!this.running) {
+			this.notify();
+		}
+		this.running = true;
 	}
 
 	/**
@@ -85,7 +140,8 @@ public class StageManager {
 				try {
 					toRemove.add(future.getKey());
 					this.results.add(future.getValue().get());
-					System.out.println("Collecting Result");
+					logger.info("Collecting Result for Stage "
+							+ future.getKey().toString());
 				} catch (InterruptedException | ExecutionException e) {
 					e.printStackTrace();
 				}
@@ -102,32 +158,21 @@ public class StageManager {
 	/**
 	 * The StageResults are kept for evaluation. The Futures and Stages and
 	 * connecting queues will be cleared. All scheduled stages are discarded.
+	 * The method will return, once all Futures are collected
 	 */
-	public void shutdown() {
-		System.out.println("Shutting down manager");
+	public void signalShutdown() {
+		logger.info("Shutting down manager");
 		this.executor.shutdown();
+		this.running = false;
+	}
 
-		// tell all stages to finish gracefully
-		// but do not await the results just yet, because they might take time
-		// to finish
-		for (Stage<?, ?> stage : this.runningStages.keySet()) {
-			stage.finish();
+	public String waitForFuture() {
+		try {
+			return this.stageManagerFuture.get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
 		}
-
-		for (BlockingQueue<?> queue : this.connectors) {
-			queue.clear();
-		}
-
-		for (Future<StageResult> future : this.runningStages.values()) {
-			try {
-				this.results.add(future.get());
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
-		}
-		this.scheduledStages.clear();
-		this.runningStages.clear();
-		this.connectors.clear();
+		return null;
 	}
 
 	/**
@@ -149,4 +194,5 @@ public class StageManager {
 	public List<StageResult> getStageResults() {
 		return this.results;
 	}
+
 }

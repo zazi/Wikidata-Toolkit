@@ -17,12 +17,9 @@ import org.wikidata.wdtk.dumpfiles.MwRevisionProcessor;
 import org.wikidata.wdtk.dumpfiles.MwRevisionProcessorBroker;
 import org.wikidata.wdtk.dumpfiles.StatisticsMwRevisionProcessor;
 import org.wikidata.wdtk.dumpfiles.WikibaseRevisionProcessor;
-import org.wikidata.wdtk.util.Timer;
 
 public class RevisionProcessingStage extends
 		ContextFreeStage<MwDumpFile, JSONObject> {
-	
-	private Timer timer = new Timer("Revision processing", Timer.RECORD_ALL);
 	
 	// TODO for now this just wraps the rest of the tool chain...
 
@@ -55,7 +52,6 @@ public class RevisionProcessingStage extends
 
 	@Override
 	public JSONObject processElement(MwDumpFile element) {
-		timer.start();
 		// TODO find out when the stage should finish
 		// for now finishing is done via the master
 
@@ -69,17 +65,7 @@ public class RevisionProcessingStage extends
 			e.printStackTrace();
 		}
 
-		timer.stop();
 		return null;
-	}
-
-	/**
-	 * Finishes the run and prints the timer information
-	 */
-	@Override
-	public synchronized void finish(){
-		this.running = false;
-		System.out.println("Revision processing time: " + this.timer.toString());
 	}
 	
 	// NOTE this could be a stage of its own

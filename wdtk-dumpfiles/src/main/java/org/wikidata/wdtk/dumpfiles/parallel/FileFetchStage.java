@@ -1,32 +1,30 @@
 package org.wikidata.wdtk.dumpfiles.parallel;
 
 import java.io.IOException;
-import java.util.LinkedList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wikidata.wdtk.dumpfiles.MwDumpFile;
 
 public class FileFetchStage extends ContextFreeStage<MwDumpFile, MwDumpFile> {
 	
+	private Logger logger = LoggerFactory.getLogger(FileFetchStage.class);
+	
 	// TODO maybe later stages need more context information?
 	
 	public FileFetchStage(){
-		this.consumers = new LinkedList<>();
-		this.producers = new LinkedList<>();
 		this.waitTime = 1000;
 		this.result = new CounterStageResult();
 		
 	}
 	
 	@Override
-	protected void afterStep(){
-		// finish, since there will be no additional input
-		this.finish();
-	}
+	protected void afterStep(){}
 	
 	@Override
 	public MwDumpFile processElement(MwDumpFile element) {
 		
-		System.out.println("Processing " + element.getProjectName() + " :: " + element.getDateStamp());
+		logger.info("Processing " + element.getProjectName() + " :: " + element.getDateStamp());
 		
 		try {
 			// TODO unclutter this call into several useful calls
@@ -38,6 +36,7 @@ public class FileFetchStage extends ContextFreeStage<MwDumpFile, MwDumpFile> {
 			return element;
 			
 		} catch (IOException e) {
+			// XXX for now… log them later on
 			e.printStackTrace();
 		}
 		return null;

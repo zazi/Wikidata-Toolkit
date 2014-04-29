@@ -20,20 +20,6 @@ public class CollectorStage<Type> extends ContextFreeStage<Type, Type> {
 		this.producers = new LinkedList<>();
 	}
 	
-	/**
-	 * Only one consumer can be added.
-	 * On the attempt to add another consumer the method will return false.
-	 */
-	@Override
-	public  synchronized boolean addConsumer(BlockingQueue<Type> consumer){
-		if(this.consumers.isEmpty()){
-			this.consumers = Collections.singletonList(consumer);
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
 	@Override
 	public Type processElement(Type element) {
 		// filter or sorting here
