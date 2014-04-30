@@ -43,7 +43,8 @@ public class WdtkStagedExample {
 
 		manager.run();
 		
-		manager.signalShutdown();
+		// here you could do something else
+		
 		manager.waitForFuture();
 
 		for (StageResult r : manager.getStageResults()) {

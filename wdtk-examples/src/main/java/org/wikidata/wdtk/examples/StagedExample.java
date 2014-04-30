@@ -22,11 +22,8 @@ public class StagedExample {
 		SquaringStage squarer = new SquaringStage();
 		PrintingStage<Integer> printer = new PrintingStage<>();
 		
-		manager.submitStage(collector);
-		manager.submitStage(squarer);
-		manager.submitStage(printer);
-		
 		// define who is connected to whom
+		// note that connected stages are submitted automatically
 		manager.connectStages(squarer, collector);
 		manager.connectStages(collector, printer);
 		
@@ -40,7 +37,7 @@ public class StagedExample {
 		// run the setup
 		manager.run();
 		
-		manager.signalShutdown();
+		// wait until it finishes
 		manager.waitForFuture();
 		
 		// once finished, print the stage reports

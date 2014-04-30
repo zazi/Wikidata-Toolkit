@@ -9,7 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * A stage batch-processes all elements provided by producers. The results of
  * the processing are given to consumers. The life cycle of a stage starts when
- * calling the call()-method. Then the stage will call process() upon all
+ * using the call()-method. Then the stage will call process() upon all
  * elements provided by all producers in the order they arrived in the input queue. 
  * Once all elements available at the point of calling process() are done, the stage waits for new elements. A stage can be signaled that there will be
  * no more elements to process. It then will process all remaining elements and
@@ -24,11 +24,13 @@ public abstract class Stage<InType, OutType> implements Callable<StageResult> {
 	protected boolean finished = false;
 	protected int waitTime = 100; // in usec
 
-	protected StageResult result;
+	protected StageResult result = new NoStageResult();
 	protected Collection<Stage<?, InType>> producers = new HashSet<>();
 	protected Collection<Stage<OutType, ?>> consumers = new HashSet<>();
 	
 	protected BlockingQueue<InType> inputQueue = new LinkedBlockingQueue<InType>();
+	
+	protected StageManager manager = null;
 
 	public synchronized void addProducer(Stage<?, InType> producer) {
 		this.producers.add(producer);
@@ -36,6 +38,10 @@ public abstract class Stage<InType, OutType> implements Callable<StageResult> {
 
 	public synchronized void addConsumer(Stage<OutType, ?> consumer) {
 		this.consumers.add(consumer);
+	}
+	
+	public synchronized void setStageManager(StageManager manager){
+		this.manager = manager;
 	}
 	
 	/**
@@ -72,5 +78,16 @@ public abstract class Stage<InType, OutType> implements Callable<StageResult> {
 	@Override
 	public String toString(){
 		return this.getClass().toString();
+	}
+	
+	/**
+	 * Notify the StageManager that the stage has finished (if one is set).
+	 */
+	protected void notifyStageManager(){
+		if(this.manager != null){
+			synchronized(this.manager){
+				this.manager.notify();
+			}
+		}
 	}
 }

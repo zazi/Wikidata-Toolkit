@@ -75,6 +75,7 @@ public abstract class ContextFreeStage<InType, OutType> extends
 
 		}
 		this.finished = true;
+		this.notifyStageManager();
 		return this.result;
 	}
 

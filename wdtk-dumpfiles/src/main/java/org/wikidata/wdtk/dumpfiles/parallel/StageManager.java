@@ -1,10 +1,12 @@
 package org.wikidata.wdtk.dumpfiles.parallel;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -25,15 +27,24 @@ public class StageManager implements Callable<String> {
 	// XXX the generic type of the Callable-Interface is not fixed
 	// See what will be better fitting…
 
-	// TODO the manager shut down, once all stages are done, but should be able
+	// TODO the manager shuts down, once all stages are done, but should be able
 	// to be restarted later again via run()
 
+	/**
+	 * The executor that handles running the given threads. A cached thread pool
+	 * seems to be the best choice for the requirements of the WDTK.
+	 */
 	private ExecutorService executor = Executors.newCachedThreadPool();
-	private List<Stage<?, ?>> scheduledStages = new LinkedList<>();
+
+	/**
+	 * The stages to be run by this class instance. Used a set here since it
+	 * makes no sense to schedule a given Stage-instance multiple times in one
+	 * run.
+	 */
+	private Set<Stage<?, ?>> scheduledStages = new HashSet<>();
 	private Map<Stage<?, ?>, Future<StageResult>> runningStages = new HashMap<>();
 	private List<StageResult> results = new LinkedList<>();
 	private Future<String> stageManagerFuture;
-	private boolean running = false;
 
 	private Logger logger = LoggerFactory.getLogger(StageManager.class);
 
@@ -48,19 +59,18 @@ public class StageManager implements Callable<String> {
 	@Override
 	public String call() throws Exception {
 
-		logger.info("Stage manager running");
+		logger.info("Stage manager ready");
 		// start out in setup mode, waiting for a signal to run
+		// [0]
 		synchronized (this) {
 			try {
 				this.wait();
-			} catch (InterruptedException e) {
-			}
+			} catch (InterruptedException e) {}
 		}
 
 		// the working loop
-		while (this.running) {
-
-			this.collectResults();
+		logger.info("Stage manager running");
+		while (!this.runningStages.isEmpty()) {
 
 			synchronized (this) {
 				try {
@@ -69,8 +79,11 @@ public class StageManager implements Callable<String> {
 				} catch (InterruptedException e) {
 				}
 			}
+			
+			this.collectResults();
 		}
 
+		this.signalShutdown();
 		this.scheduledStages.clear();
 
 		// get all the outstanding results
@@ -88,13 +101,19 @@ public class StageManager implements Callable<String> {
 	}
 
 	/**
-	 * 
+	 * Connects two Stages together. The sender stage is the producer of objects
+	 * while the receiver stage is the consumer of objects. 
+	 * The OutType of the sender must be the same as the InType of the receiver.
+	 * Stages that are connected are also automatically submitted.
 	 * @param sender
 	 * @param receiver
 	 * @return
 	 */
 	public synchronized <CommonType> void connectStages(
 			Stage<?, CommonType> sender, Stage<CommonType, ?> receiver) {
+
+		this.submitStage(sender);
+		this.submitStage(receiver);
 
 		sender.addConsumer(receiver);
 		receiver.addProducer(sender);
@@ -107,23 +126,23 @@ public class StageManager implements Callable<String> {
 	 */
 	public synchronized void submitStage(Stage<?, ?> toLaunch) {
 
+		toLaunch.setStageManager(this);
 		this.scheduledStages.add(toLaunch);
 	}
 
 	/**
-	 * Executes all earlier submitted stages. This hands the stages threads over
-	 * to the
+	 * Execute all earlier submitted stages.
 	 */
 	public synchronized void run() {
+		
 		for (Stage<?, ?> stage : this.scheduledStages) {
 			Future<StageResult> result = executor.submit(stage);
 			this.runningStages.put(stage, result);
 		}
-
-		if (!this.running) {
-			this.notify();
-		}
-		this.running = true;
+		
+		// notify the StageManagers thread to abort the wait for the run-signal
+		// see [0]
+		this.notify();
 	}
 
 	/**
@@ -160,10 +179,9 @@ public class StageManager implements Callable<String> {
 	 * connecting queues will be cleared. All scheduled stages are discarded.
 	 * The method will return, once all Futures are collected
 	 */
-	public void signalShutdown() {
+	protected void signalShutdown() {
 		logger.info("Shutting down manager");
 		this.executor.shutdown();
-		this.running = false;
 	}
 
 	public String waitForFuture() {
