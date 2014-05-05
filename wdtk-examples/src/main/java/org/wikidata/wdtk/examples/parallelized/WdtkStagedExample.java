@@ -1,4 +1,4 @@
-package org.wikidata.wdtk.examples;
+package org.wikidata.wdtk.examples.parallelized;
 
 import java.io.IOException;
 
@@ -12,6 +12,7 @@ import org.wikidata.wdtk.dumpfiles.parallel.FileFetchStage;
 import org.wikidata.wdtk.dumpfiles.parallel.RevisionProcessingStage;
 import org.wikidata.wdtk.dumpfiles.parallel.StageManager;
 import org.wikidata.wdtk.dumpfiles.parallel.StageResult;
+import org.wikidata.wdtk.examples.ExampleHelpers;
 import org.wikidata.wdtk.util.DirectoryManager;
 import org.wikidata.wdtk.util.DirectoryManagerImpl;
 import org.wikidata.wdtk.util.Timer;
@@ -25,8 +26,7 @@ public class WdtkStagedExample {
 
 	public static void main(String[] args) throws IOException {
 		
-		configureLogging();
-
+		ExampleHelpers.configureLogging();
 		
 		FileFetchStage fileFetcher = new FileFetchStage();
 		RevisionProcessingStage revisionProcessor = new RevisionProcessingStage();
@@ -37,7 +37,7 @@ public class WdtkStagedExample {
 
 		// fill the queues
 		WmfDumpFileManager dumpfileManager = createDumpFileManager();
-		for(MwDumpFile file : dumpfileManager.findAllRelevantDumps(true)){
+		for(MwDumpFile file : dumpfileManager.findAllRelevantRevisionDumps(true)){
 			fileFetcher.addInput(file);
 		}
 
@@ -65,25 +65,5 @@ public class WdtkStagedExample {
 		// The string "wikidatawiki" identifies Wikidata.org:
 		return new WmfDumpFileManager("wikidatawiki", downloadDirectoryManager,
 				webResourceFetcher);
-	}
-	
-	/**
-	 * Defines how messages should be logged. This method can be modified to
-	 * restrict the logging messages that are shown on the console or to change
-	 * their formatting. See the documentation of Log4J for details on how to do
-	 * this.
-	 */
-	private static void configureLogging() {
-		// Create the appender that will write log messages to the console.
-		ConsoleAppender consoleAppender = new ConsoleAppender();
-		// Define the pattern of log messages.
-		// Insert the string "%c{1}:%L" to also show class name and line.
-		String pattern = "%d{yyyy-MM-dd HH:mm:ss} %-5p - %m%n";
-		consoleAppender.setLayout(new PatternLayout(pattern));
-		// Change to Level.ERROR for fewer messages:
-		consoleAppender.setThreshold(Level.INFO);
-
-		consoleAppender.activateOptions();
-		Logger.getRootLogger().addAppender(consoleAppender);
 	}
 }

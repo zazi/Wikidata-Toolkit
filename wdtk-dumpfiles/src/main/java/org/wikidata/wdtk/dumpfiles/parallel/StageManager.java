@@ -23,12 +23,8 @@ import org.slf4j.LoggerFactory;
  * @author Fredo Erxleben
  * 
  */
-public class StageManager implements Callable<String> {
-	// XXX the generic type of the Callable-Interface is not fixed
-	// See what will be better fitting…
+public class StageManager implements Callable<StageResult> {
 
-	// TODO the manager shuts down, once all stages are done, but should be able
-	// to be restarted later again via run()
 
 	/**
 	 * The executor that handles running the given threads. A cached thread pool
@@ -44,7 +40,8 @@ public class StageManager implements Callable<String> {
 	private Set<Stage<?, ?>> scheduledStages = new HashSet<>();
 	private Map<Stage<?, ?>, Future<StageResult>> runningStages = new HashMap<>();
 	private List<StageResult> results = new LinkedList<>();
-	private Future<String> stageManagerFuture;
+	private Future<StageResult> stageManagerFuture;
+	private int waitTime = 10000;
 
 	private Logger logger = LoggerFactory.getLogger(StageManager.class);
 
@@ -57,7 +54,7 @@ public class StageManager implements Callable<String> {
 	 * and then checks if there are Futures that can be collected yet. Once the
 	 */
 	@Override
-	public String call() throws Exception {
+	public StageResult call() throws Exception {
 
 		logger.info("Stage manager ready");
 		// start out in setup mode, waiting for a signal to run
@@ -74,8 +71,7 @@ public class StageManager implements Callable<String> {
 
 			synchronized (this) {
 				try {
-					// TODO move wait time into a field
-					this.wait(10000);
+					this.wait(this.waitTime);
 				} catch (InterruptedException e) {
 				}
 			}
@@ -97,7 +93,7 @@ public class StageManager implements Callable<String> {
 		}
 		this.runningStages.clear();
 
-		return null;
+		return new NoStageResult();
 	}
 
 	/**
@@ -175,22 +171,23 @@ public class StageManager implements Callable<String> {
 	}
 
 	/**
-	 * The StageResults are kept for evaluation. The Futures and Stages and
-	 * connecting queues will be cleared. All scheduled stages are discarded.
-	 * The method will return, once all Futures are collected
+	 * Signal the shutdown to the executor.
 	 */
 	protected void signalShutdown() {
 		logger.info("Shutting down manager");
 		this.executor.shutdown();
 	}
 
-	public String waitForFuture() {
+	/**
+	 * 
+	 * @return
+	 */
+	public StageResult waitForFuture() {
 		try {
 			return this.stageManagerFuture.get();
 		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
+			return new FailedStageResult(e);
 		}
-		return null;
 	}
 
 	/**

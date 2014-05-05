@@ -7,11 +7,26 @@ package org.wikidata.wdtk.dumpfiles.parallel;
  */
 public class FailedStageResult extends StageResult {
 	
-	// TODO allow submitting a reason
+	private String reason;
+	private Exception exception;
+	
+	public FailedStageResult(Exception exception){
+		this.exception = exception;
+		this.reason = exception.getMessage();
+	}
+	
+	public FailedStageResult(){
+		this.exception = null;
+		this.reason = "No reason given.";
+	}
+	
+	public Exception getException(){
+		return this.exception;
+	}
 	
 	@Override
 	public String getReport() {
-		return "Stage execution failed";
+		return "Stage execution failed.\n" + this.reason;
 	}
 
 }

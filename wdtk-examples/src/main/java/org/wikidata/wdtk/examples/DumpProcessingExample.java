@@ -20,7 +20,13 @@ package org.wikidata.wdtk.examples;
  * #L%
  */
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocumentProcessor;
 import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
@@ -40,8 +46,14 @@ import org.wikidata.wdtk.dumpfiles.StatisticsMwRevisionProcessor;
  */
 public class DumpProcessingExample {
 
+	public static BufferedWriter propertyFileWriter;
+	
 	public static void main(String[] args) throws IOException {
 
+		// create the file writer
+		propertyFileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("properties.csv")));
+		
+		
 		// Define where log messages go
 		ExampleHelpers.configureLogging();
 
@@ -61,7 +73,7 @@ public class DumpProcessingExample {
 		EntityDocumentProcessor edpItemStats = new ItemStatisticsProcessor();
 		// Subscribe to the most recent entity documents of type wikibase item:
 		dumpProcessingController.registerEntityDocumentProcessor(edpItemStats,
-				MwRevision.MODEL_WIKIBASE_ITEM, true);
+				MwRevision.MODEL_WIKIBASE_PROPERTY, true);
 
 		// General statistics and time keeping:
 		MwRevisionProcessor rpRevisionStats = new StatisticsMwRevisionProcessor(
@@ -75,6 +87,8 @@ public class DumpProcessingExample {
 
 		// // Process just a recent daily dump for testing:
 		// dumpProcessingController.processMostRecentDailyDump();
+		
+		propertyFileWriter.close();
 	}
 
 	/**
@@ -134,16 +148,21 @@ public class DumpProcessingExample {
 			this.countSiteLinks += itemDocument.getSiteLinks().size();
 
 			// print a report every 10000 items:
-			if (this.countItems % 10000 == 0) {
+			if (this.countItems % 100000 == 0) {
 				printReport();
 			}
 		}
 
 		@Override
 		public void processPropertyDocument(PropertyDocument propertyDocument) {
-			// ignore properties
-			// (in fact, the above code does not even register the processor for
-			// receiving properties)
+			// create a new file and write pid + descriptions
+			String pID = propertyDocument.getPropertyId().toString();
+			String text =  pID.substring(pID.lastIndexOf("/")+1).trim() + ":: \"" + propertyDocument.getDescriptions().get("en").toString() + "\"";
+			System.out.println(text);
+			try {
+				propertyFileWriter.write(text);
+				propertyFileWriter.newLine();
+			} catch (IOException e) {e.printStackTrace();}
 		}
 
 		@Override

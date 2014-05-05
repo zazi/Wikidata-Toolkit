@@ -229,6 +229,11 @@ public class JsonConverter {
 	 * @throws JSONException
 	 */
 	private PropertyIdValue getPropertyIdValue(String id) throws JSONException {
+		// input tends to be of the form "Property:P21"
+		if(id.startsWith("Property:")){
+			String[] parts = id.split(":");
+			id=parts[parts.length-1];
+		}
 		try {
 			return this.factory.getPropertyIdValue(id.toUpperCase(),
 					this.baseIri);
@@ -348,9 +353,6 @@ public class JsonConverter {
 
 		Map<String, SiteLink> result = new HashMap<String, SiteLink>();
 
-		// FIXME we need to get the proper IRI instead
-		String siteIri = "";
-
 		// json.org does not type its Iterator: unchecked cast needed
 		@SuppressWarnings("unchecked")
 		Iterator<String> linkIterator = jsonObject.keys();
@@ -376,8 +378,7 @@ public class JsonConverter {
 			}
 
 			// create the SiteLink instance
-			SiteLink siteLink = factory.getSiteLink(title, siteKey, siteIri,
-					badges);
+			SiteLink siteLink = factory.getSiteLink(title, siteKey, badges);
 			result.put(siteKey, siteLink);
 		}
 

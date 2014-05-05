@@ -1,20 +1,19 @@
-package org.wikidata.wdtk.examples;
+package org.wikidata.wdtk.examples.parallelized;
 
 import org.wikidata.wdtk.dumpfiles.parallel.ContextFreeStage;
 import org.wikidata.wdtk.dumpfiles.parallel.CounterStageResult;
 
-public class PrintingStage<InType> extends ContextFreeStage<InType, Void> {
-	
-	PrintingStage(){
+public class SquaringStage extends ContextFreeStage<Integer, Integer> {
+
+	SquaringStage(){
 		this.result = new CounterStageResult();
 	}
 	
 	@Override
-	public Void processElement(InType element) {
+	public Integer processElement(Integer element) {
 		
 		((CounterStageResult) this.result).increment();
-		System.out.println(element.toString());
-		return null;
+		return element * element;
 	}
 
 }
