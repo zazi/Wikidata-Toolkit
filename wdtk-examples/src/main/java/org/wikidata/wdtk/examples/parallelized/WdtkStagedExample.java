@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.wikidata.wdtk.dumpfiles.MwDumpFile;
 import org.wikidata.wdtk.dumpfiles.WmfDumpFileManager;
+import org.wikidata.wdtk.dumpfiles.parallel.DecompressorStage;
 import org.wikidata.wdtk.dumpfiles.parallel.FileFetchStage;
 import org.wikidata.wdtk.dumpfiles.parallel.RevisionProcessingStage;
 import org.wikidata.wdtk.dumpfiles.parallel.StageManager;
@@ -29,11 +30,13 @@ public class WdtkStagedExample {
 		ExampleHelpers.configureLogging();
 		
 		FileFetchStage fileFetcher = new FileFetchStage();
-		RevisionProcessingStage revisionProcessor = new RevisionProcessingStage();
+		DecompressorStage decompressor = new DecompressorStage();
+		// RevisionProcessingStage revisionProcessor = new RevisionProcessingStage(); // todo deprecated
 
-		manager.submitStage(fileFetcher);
-		manager.submitStage(revisionProcessor);
-		manager.connectStages(fileFetcher, revisionProcessor);
+		manager.submitStage(fileFetcher); // NOTE redundant
+		// manager.submitStage(revisionProcessor); // NOTE redundant
+		manager.connectStages(fileFetcher, decompressor);
+		// TODO complete chain
 
 		// fill the queues
 		WmfDumpFileManager dumpfileManager = createDumpFileManager();

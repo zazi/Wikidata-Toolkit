@@ -25,11 +25,11 @@ import org.slf4j.LoggerFactory;
  */
 public class StageManager implements Callable<StageResult> {
 
-
 	/**
 	 * The executor that handles running the given threads. A cached thread pool
 	 * seems to be the best choice for the requirements of the WDTK.
 	 */
+	// / XXX is a cached thread pool really the best choice?
 	private ExecutorService executor = Executors.newCachedThreadPool();
 
 	/**
@@ -51,7 +51,9 @@ public class StageManager implements Callable<StageResult> {
 
 	/**
 	 * Runs the StageManagerThread. Internally the thread just waits some time
-	 * and then checks if there are Futures that can be collected yet. Once the
+	 * and then checks if there are Futures that can be collected yet. Once all
+	 * scheduled stages have finished, the StageManagers thread will shutdown
+	 * and collect all outstanding results, returning a StageResult.
 	 */
 	@Override
 	public StageResult call() throws Exception {
@@ -62,7 +64,8 @@ public class StageManager implements Callable<StageResult> {
 		synchronized (this) {
 			try {
 				this.wait();
-			} catch (InterruptedException e) {}
+			} catch (InterruptedException e) {
+			}
 		}
 
 		// the working loop
@@ -75,7 +78,7 @@ public class StageManager implements Callable<StageResult> {
 				} catch (InterruptedException e) {
 				}
 			}
-			
+
 			this.collectResults();
 		}
 
@@ -98,9 +101,10 @@ public class StageManager implements Callable<StageResult> {
 
 	/**
 	 * Connects two Stages together. The sender stage is the producer of objects
-	 * while the receiver stage is the consumer of objects. 
-	 * The OutType of the sender must be the same as the InType of the receiver.
-	 * Stages that are connected are also automatically submitted.
+	 * while the receiver stage is the consumer of objects. The OutType of the
+	 * sender must be the same as the InType of the receiver. Stages that are
+	 * connected are also automatically submitted.
+	 * 
 	 * @param sender
 	 * @param receiver
 	 * @return
@@ -127,22 +131,24 @@ public class StageManager implements Callable<StageResult> {
 	}
 
 	/**
-	 * Execute all earlier submitted stages.
+	 * Give all earlier submitted stages to the executor. Switches the manager
+	 * from <i>waiting mode</i> to <i>running mode</i>.
 	 */
 	public synchronized void run() {
-		
+
 		for (Stage<?, ?> stage : this.scheduledStages) {
 			Future<StageResult> result = executor.submit(stage);
 			this.runningStages.put(stage, result);
 		}
-		
+
 		// notify the StageManagers thread to abort the wait for the run-signal
 		// see [0]
 		this.notify();
 	}
 
 	/**
-	 * Collects all available results.
+	 * Collects all available results from stages that have finished but not yet
+	 * been collected.
 	 * 
 	 * @return true, if no more results are outstanding.
 	 */

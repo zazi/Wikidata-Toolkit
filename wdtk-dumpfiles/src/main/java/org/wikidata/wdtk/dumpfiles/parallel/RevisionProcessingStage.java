@@ -18,10 +18,12 @@ import org.wikidata.wdtk.dumpfiles.MwRevisionProcessorBroker;
 import org.wikidata.wdtk.dumpfiles.StatisticsMwRevisionProcessor;
 import org.wikidata.wdtk.dumpfiles.WikibaseRevisionProcessor;
 
+@Deprecated
 public class RevisionProcessingStage extends
 		ContextFreeStage<MwDumpFile, JSONObject> {
 	
 	// TODO for now this just wraps the rest of the tool chain...
+	// TODO since the Revision processors have changed this needs updating
 
 	private MwDumpFileProcessor dfProcessor;
 	private MwRevisionProcessorBroker mwRevisionBroker;

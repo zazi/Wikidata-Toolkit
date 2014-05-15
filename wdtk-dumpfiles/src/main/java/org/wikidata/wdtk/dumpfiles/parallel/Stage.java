@@ -13,7 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * elements provided by all producers in the order they arrived in the input queue. 
  * Once all elements available at the point of calling process() are done, the stage waits for new elements. A stage can be signaled that there will be
  * no more elements to process. It then will process all remaining elements and
- * return a StageResult.
+ * return a StageResult. This StageResult can be re-defined by subclasses.
  * 
  * @author Fredo Erxleben
  * 
@@ -54,14 +54,14 @@ public abstract class Stage<InType, OutType> implements Callable<StageResult> {
 
 	/**
 	 * Distribute a processed element to all registered consumers.
-	 * The element is always added into their input queues.
+	 * The element is always added into their input queues. The consumer is notified of the new data available.
 	 * @param myOutput
 	 */
 	protected void distribute(OutType myOutput){
-		for(Stage<OutType, ?> s : this.consumers){
-			s.addInput(myOutput);
-			synchronized(s){
-				s.notify();
+		for(Stage<OutType, ?> consumer : this.consumers){
+			consumer.addInput(myOutput);
+			synchronized(consumer){
+				consumer.notify();
 			}
 		}
 	}
@@ -70,7 +70,7 @@ public abstract class Stage<InType, OutType> implements Callable<StageResult> {
 		return this.finished;
 	}
 	
-	public abstract OutType processElement(InType element);
+	public abstract OutType processElement(InType element) throws Exception;
 
 	@Override
 	public abstract StageResult call() throws Exception;

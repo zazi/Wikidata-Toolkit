@@ -37,7 +37,8 @@ public abstract class ContextFreeStage<InType, OutType> extends
 			if (this.inputQueue.isEmpty()) {
 				try {
 					this.wait(this.waitTime);
-				} catch (InterruptedException e) {}
+				} catch (InterruptedException e) {
+				}
 			}
 		}
 	}
@@ -65,9 +66,17 @@ public abstract class ContextFreeStage<InType, OutType> extends
 			this.inputQueue.drainTo(currentStep);
 			// process the elements
 			while (!currentStep.isEmpty()) {
-				OutType stepResult = this.processElement(currentStep.remove(0));
-				// distribute result to all consumers
-				this.distribute(stepResult);
+				try {
+					OutType stepResult = this.processElement(currentStep
+							.remove(0));
+					// distribute result to all consumers
+					this.distribute(stepResult);
+				} catch (Exception e) {
+					// skip elements that did not process correctly
+					// TODO better exception handling (logging?)
+					e.printStackTrace();
+				}
+
 			}
 
 			// wait for new input

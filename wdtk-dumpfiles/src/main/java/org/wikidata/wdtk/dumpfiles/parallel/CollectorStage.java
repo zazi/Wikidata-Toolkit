@@ -1,8 +1,6 @@
 package org.wikidata.wdtk.dumpfiles.parallel;
 
-import java.util.Collections;
 import java.util.LinkedList;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * A collector stage is a stage that collects the results of multiple producers
