@@ -143,6 +143,8 @@ public class DumpProcessingController {
 	 * outside this package.
 	 */
 	DirectoryManager downloadDirectoryManager;
+	
+	boolean offlineMode = false;
 
 	/**
 	 * Creates a new DumpFileProcessingController for the project of the given
@@ -194,11 +196,17 @@ public class DumpProcessingController {
 	public void setOfflineMode(boolean offlineModeEnabled) {
 		if (offlineModeEnabled) {
 			this.webResourceFetcher = null;
+			this.offlineMode = true;
 		} else {
 			this.webResourceFetcher = new WebResourceFetcherImpl();
+			this.offlineMode = false;
 		}
 	}
 
+	public boolean getOfflineMode(){
+		return this.offlineMode;
+	}
+	
 	/**
 	 * Registers an MwRevisionProcessor, which will henceforth be notified of
 	 * all revisions that are encountered in the dump.

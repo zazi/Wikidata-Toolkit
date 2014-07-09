@@ -94,7 +94,7 @@ public class RdfSerializer implements EntityDocumentsSerializer {
 	public void setTasks(int tasks) {
 		this.rdfConverter.setTasks(tasks);
 	}
-
+	
 	/**
 	 * Returns the number of triples that have been written so far.
 	 * 

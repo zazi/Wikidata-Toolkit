@@ -119,5 +119,11 @@ public interface PropertyTypes {
 	 * @throws IOException
 	 */
 	public void getPropertyList(OutputStream out) throws IOException;
+	
+	/**
+	 * Disables or Enables Web access to search for property types.
+	 * @param offlineModeEnabled
+	 */
+	public void setOfflineMode(boolean offlineModeEnabled);
 
 }

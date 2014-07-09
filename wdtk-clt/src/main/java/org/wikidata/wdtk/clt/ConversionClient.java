@@ -29,6 +29,7 @@ import org.wikidata.wdtk.dumpfiles.DumpProcessingController;
 import org.wikidata.wdtk.dumpfiles.MwRevision;
 import org.wikidata.wdtk.dumpfiles.MwRevisionProcessor;
 import org.wikidata.wdtk.dumpfiles.StatisticsMwRevisionProcessor;
+import org.wikidata.wdtk.rdf.RdfConverter;
 import org.wikidata.wdtk.rdf.RdfSerializer;
 
 /*
@@ -290,6 +291,10 @@ public class ConversionClient {
 		// Set up the serializer and write headers
 		startSerializers();
 
+		if (dumpProcessingController.getOfflineMode()){
+			RdfConverter.getPropertyTypes().setOfflineMode(true);
+		}
+		
 		System.out.println("processMostrecentMainDump");
 		// Start processing (may trigger downloads where needed)
 		dumpProcessingController.processMostRecentMainDump();

@@ -98,6 +98,10 @@ public class RdfConverter {
 		this.tasks = tasks;
 	}
 
+	public static PropertyTypes getPropertyTypes(){
+		return propertyTypes;
+	}
+	
 	/**
 	 * Writes OWL declarations for all basic vocabulary elements used in the
 	 * dump.

@@ -63,6 +63,8 @@ public class WikidataPropertyTypes implements PropertyTypes {
 
 	PropertyIdValue propertyRegister = null;
 	String webAPIUrl;
+	
+	boolean offlineModeEnabled = false;
 
 	WebResourceFetcher webResourceFetcher = new WebResourceFetcherImpl();
 
@@ -73,15 +75,24 @@ public class WikidataPropertyTypes implements PropertyTypes {
 	}
 
 	@Override
+	public void setOfflineMode(boolean offlineModeEnabled){
+		this.offlineModeEnabled = offlineModeEnabled;
+	}
+	
+	@Override
 	public String getPropertyType(PropertyIdValue propertyIdValue) {
 		if (!propertyTypes.containsKey(propertyIdValue.getId())) {
-			try {
-				propertyTypes.put(propertyIdValue.getId(),
+			if (!offlineModeEnabled){
+				try {
+					propertyTypes.put(propertyIdValue.getId(),
 						fetchPropertyType(propertyIdValue));
-			} catch (IOException e) {
-				logger.error(e.toString());
-			} catch (URISyntaxException e) {
-				logger.error(e.toString());
+				} catch (IOException e) {
+					logger.error(e.toString());
+				} catch (URISyntaxException e) {
+					logger.error(e.toString());
+				}
+			}else{
+				logger.error("can not find property type " + propertyIdValue.getId() + ". OfflineMode enabled!");
 			}
 		}
 		return propertyTypes.get(propertyIdValue.getId());

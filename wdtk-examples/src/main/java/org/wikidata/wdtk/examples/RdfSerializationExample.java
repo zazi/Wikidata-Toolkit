@@ -41,6 +41,7 @@ import org.wikidata.wdtk.dumpfiles.DumpProcessingController;
 import org.wikidata.wdtk.dumpfiles.MwRevision;
 import org.wikidata.wdtk.dumpfiles.MwRevisionProcessor;
 import org.wikidata.wdtk.dumpfiles.StatisticsMwRevisionProcessor;
+import org.wikidata.wdtk.rdf.RdfConverter;
 import org.wikidata.wdtk.rdf.RdfSerializer;
 
 /**
@@ -107,6 +108,10 @@ public class RdfSerializationExample {
 		// Set up the serializer and write headers
 		startSerializers();
 
+		if (dumpProcessingController.getOfflineMode()){
+			RdfConverter.getPropertyTypes().setOfflineMode(true);
+		}
+		
 		// Start processing (may trigger downloads where needed)
 		dumpProcessingController.processMostRecentMainDump();
 
@@ -140,7 +145,7 @@ public class RdfSerializationExample {
 	private static RdfSerializer createRdfSerializer(String outputFileName,
 			String compressionExtension, int tasks)
 			throws FileNotFoundException, IOException {
-
+		
 		OutputStream bufferedFileOutputStream = new BufferedOutputStream(
 				new FileOutputStream(outputFileName + compressionExtension),
 				1024 * 1024 * 5 * 0 + 100);
@@ -191,6 +196,7 @@ public class RdfSerializationExample {
 	 * has no headers, but other formats have).
 	 */
 	private static void startSerializers() {
+		
 		for (RdfSerializer serializer : serializers) {
 			serializer.start();
 		}
