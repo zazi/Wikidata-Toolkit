@@ -92,10 +92,10 @@ public class WmfOnlineStandardDumpFile extends WmfDumpFile {
 		prepareDumpFile();
 
 		String fileName = WmfDumpFile.getDumpFileName(this.dumpContentType,
-				this.projectName, this.dateStamp);
+				this.metaData.getProjectName(), this.metaData.getDateStamp());
 		DirectoryManager thisDumpDirectoryManager = this.dumpfileDirectoryManager
 				.getSubdirectoryManager(WmfDumpFile.getDumpFileDirectoryName(
-						this.dumpContentType, this.dateStamp));
+						this.dumpContentType, this.metaData.getDateStamp()));
 
 		return thisDumpDirectoryManager.getInputStreamForFile(fileName,
 				WmfDumpFile.getDumpFileCompressionType(this.dumpContentType));
@@ -108,7 +108,7 @@ public class WmfOnlineStandardDumpFile extends WmfDumpFile {
 		}
 
 		String fileName = WmfDumpFile.getDumpFileName(this.dumpContentType,
-				this.projectName, this.dateStamp);
+				this.metaData.getProjectName(), this.metaData.getDateStamp());
 		String urlString = getBaseUrl() + fileName;
 
 		logger.info("Downloading "
@@ -122,7 +122,7 @@ public class WmfOnlineStandardDumpFile extends WmfDumpFile {
 
 		DirectoryManager thisDumpDirectoryManager = this.dumpfileDirectoryManager
 				.getSubdirectoryManager(WmfDumpFile.getDumpFileDirectoryName(
-						this.dumpContentType, this.dateStamp));
+						this.dumpContentType, this.metaData.getDateStamp()));
 
 		long size = 0;
 		try (InputStream inputStream = webResourceFetcher
@@ -143,8 +143,8 @@ public class WmfOnlineStandardDumpFile extends WmfDumpFile {
 	protected boolean fetchIsDone() {
 		boolean found = false;
 		try (InputStream in = this.webResourceFetcher
-				.getInputStreamForUrl(getBaseUrl() + this.projectName + "-"
-						+ dateStamp + "-md5sums.txt")) {
+				.getInputStreamForUrl(getBaseUrl() + this.metaData.getProjectName() + "-"
+						+ metaData.getDateStamp() + "-md5sums.txt")) {
 			BufferedReader bufferedReader = new BufferedReader(
 					new InputStreamReader(in, StandardCharsets.UTF_8));
 			String inputLine;
@@ -169,7 +169,7 @@ public class WmfOnlineStandardDumpFile extends WmfDumpFile {
 	 */
 	String getBaseUrl() {
 		return WmfDumpFile.getDumpFileWebDirectory(this.dumpContentType,
-				this.projectName) + this.dateStamp + "/";
+				this.metaData.getProjectName()) + this.metaData.getDateStamp() + "/";
 	}
 
 }

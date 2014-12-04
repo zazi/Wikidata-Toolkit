@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class RdfConfigurationTest {
-
+	
 	@Before
 	public void setUp() throws Exception {
 	}

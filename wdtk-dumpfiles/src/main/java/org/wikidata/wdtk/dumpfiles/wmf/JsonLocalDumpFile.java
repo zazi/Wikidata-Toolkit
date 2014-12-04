@@ -1,4 +1,5 @@
 package org.wikidata.wdtk.dumpfiles.wmf;
+
 /*
  * #%L
  * Wikidata Toolkit Dump File Handling
@@ -54,6 +55,5 @@ public class JsonLocalDumpFile extends WmfDumpFile {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
 
 }

@@ -65,8 +65,8 @@ public class WmfOnlineDailyDumpFileTest {
 		assertEquals(br.readLine(), null);
 		assertTrue(dump.isAvailable());
 		assertTrue(dump.isAvailable()); // second time should use cached entry
-		assertEquals(dateStamp, dump.getDateStamp());
-		assertEquals("wikidatawiki", dump.getProjectName());
+		assertEquals(dateStamp, dump.getMetaData().getDateStamp());
+		assertEquals("wikidatawiki", dump.getMetaData().getProjectName());
 		assertEquals("wikidatawiki-daily-" + dateStamp, dump.toString());
 		assertEquals(DumpContentType.DAILY, dump.getDumpContentType());
 	}
@@ -78,7 +78,7 @@ public class WmfOnlineDailyDumpFileTest {
 				"wikidatawiki", wrf, dm);
 
 		assertTrue(!dump.isAvailable());
-		assertEquals(dateStamp, dump.getDateStamp());
+		assertEquals(dateStamp, dump.getMetaData().getDateStamp());
 	}
 
 	@Test
@@ -91,7 +91,7 @@ public class WmfOnlineDailyDumpFileTest {
 				"wikidatawiki", wrf, dm);
 
 		assertTrue(!dump.isAvailable());
-		assertEquals(dateStamp, dump.getDateStamp());
+		assertEquals(dateStamp, dump.getMetaData().getDateStamp());
 	}
 
 	@Test

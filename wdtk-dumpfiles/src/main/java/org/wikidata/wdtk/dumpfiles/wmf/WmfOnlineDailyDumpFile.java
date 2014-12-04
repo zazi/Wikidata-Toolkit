@@ -84,10 +84,10 @@ class WmfOnlineDailyDumpFile extends WmfDumpFile {
 		prepareDumpFile();
 
 		String fileName = WmfDumpFile.getDumpFileName(DumpContentType.DAILY,
-				this.projectName, this.dateStamp);
+				this.metaData.getProjectName(), this.metaData.getDateStamp());
 		DirectoryManager dailyDirectoryManager = this.dumpfileDirectoryManager
 				.getSubdirectoryManager(WmfDumpFile.getDumpFileDirectoryName(
-						DumpContentType.DAILY, this.dateStamp));
+						DumpContentType.DAILY, this.metaData.getDateStamp()));
 
 		return dailyDirectoryManager.getInputStreamForFile(fileName,
 				WmfDumpFile.getDumpFileCompressionType(DumpContentType.DAILY));
@@ -100,7 +100,7 @@ class WmfOnlineDailyDumpFile extends WmfDumpFile {
 		}
 
 		String fileName = WmfDumpFile.getDumpFileName(DumpContentType.DAILY,
-				this.projectName, this.dateStamp);
+				this.metaData.getProjectName(), this.metaData.getDateStamp());
 		String urlString = getBaseUrl() + fileName;
 
 		logger.info("Downloading daily dump file " + fileName + " from "
@@ -113,7 +113,7 @@ class WmfOnlineDailyDumpFile extends WmfDumpFile {
 
 		DirectoryManager dailyDirectoryManager = this.dumpfileDirectoryManager
 				.getSubdirectoryManager(WmfDumpFile.getDumpFileDirectoryName(
-						DumpContentType.DAILY, this.dateStamp));
+						DumpContentType.DAILY, this.metaData.getDateStamp()));
 
 		long size = 0;
 		try (InputStream inputStream = webResourceFetcher
@@ -151,7 +151,7 @@ class WmfOnlineDailyDumpFile extends WmfDumpFile {
 	 */
 	String getBaseUrl() {
 		return WmfDumpFile.getDumpFileWebDirectory(DumpContentType.DAILY,
-				this.projectName) + this.dateStamp + "/";
+				this.metaData.getProjectName()) + this.metaData.getDateStamp() + "/";
 	}
 
 }

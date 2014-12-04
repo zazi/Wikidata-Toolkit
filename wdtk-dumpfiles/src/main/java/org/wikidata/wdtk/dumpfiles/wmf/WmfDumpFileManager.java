@@ -146,7 +146,7 @@ public class WmfDumpFileManager {
 		List<MwDumpFile> result = new ArrayList<MwDumpFile>();
 
 		for (MwDumpFile dumpFile : findAllDumps(DumpContentType.DAILY)) {
-			if (dumpFile.getDateStamp().compareTo(mainDump.getDateStamp()) > 0) {
+			if (dumpFile.getMetaData().getDateStamp().compareTo(mainDump.getMetaData().getDateStamp()) > 0) {
 				result.add(dumpFile);
 			}
 		}
@@ -217,10 +217,10 @@ public class WmfDumpFileManager {
 
 		HashSet<String> localDateStamps = new HashSet<String>();
 		for (MwDumpFile dumpFile : localDumps) {
-			localDateStamps.add(dumpFile.getDateStamp());
+			localDateStamps.add(dumpFile.getMetaData().getDateStamp());
 		}
 		for (MwDumpFile dumpFile : onlineDumps) {
-			if (!localDateStamps.contains(dumpFile.getDateStamp())) {
+			if (!localDateStamps.contains(dumpFile.getMetaData().getDateStamp())) {
 				result.add(dumpFile);
 			}
 		}

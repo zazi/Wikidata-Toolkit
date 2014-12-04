@@ -109,7 +109,7 @@ public class ConversionClient {
 
 		// Controller object for processing dumps:
 		dumpProcessingController = new DumpProcessingController("wikidatawiki");
-
+		
 		// Initialize sites; needed to link to Wikipedia pages in RDF
 		try {
 			sites = dumpProcessingController.getSitesInformation();

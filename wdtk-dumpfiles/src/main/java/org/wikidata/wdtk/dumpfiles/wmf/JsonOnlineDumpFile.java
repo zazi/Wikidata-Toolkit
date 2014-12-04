@@ -72,10 +72,10 @@ public class JsonOnlineDumpFile extends WmfDumpFile {
 		prepareDumpFile();
 
 		String fileName = WmfDumpFile.getDumpFileName(DumpContentType.JSON,
-				this.projectName, this.dateStamp);
+				this.metaData.getProjectName(), this.metaData.getDateStamp());
 		DirectoryManager dailyDirectoryManager = this.dumpfileDirectoryManager
 				.getSubdirectoryManager(WmfDumpFile.getDumpFileDirectoryName(
-						DumpContentType.JSON, this.dateStamp));
+						DumpContentType.JSON, this.metaData.getDateStamp()));
 
 		return dailyDirectoryManager.getInputStreamForFile(fileName,
 				WmfDumpFile.getDumpFileCompressionType(DumpContentType.JSON));
@@ -88,7 +88,7 @@ public class JsonOnlineDumpFile extends WmfDumpFile {
 		}
 
 		String fileName = WmfDumpFile.getDumpFileName(DumpContentType.JSON,
-				this.projectName, this.dateStamp);
+				this.metaData.getProjectName(), this.metaData.getDateStamp());
 		String urlString = getBaseUrl() + fileName;
 
 		logger.info("Downloading JSON dump file " + fileName + " from "
@@ -101,7 +101,7 @@ public class JsonOnlineDumpFile extends WmfDumpFile {
 
 		DirectoryManager dailyDirectoryManager = this.dumpfileDirectoryManager
 				.getSubdirectoryManager(WmfDumpFile.getDumpFileDirectoryName(
-						DumpContentType.JSON, this.dateStamp));
+						DumpContentType.JSON, this.metaData.getDateStamp()));
 
 		try (InputStream inputStream = webResourceFetcher
 				.getInputStreamForUrl(urlString)) {
@@ -128,7 +128,7 @@ public class JsonOnlineDumpFile extends WmfDumpFile {
 	 */
 	String getBaseUrl() {
 		return WmfDumpFile.getDumpFileWebDirectory(DumpContentType.JSON,
-				this.projectName);
+				this.metaData.getProjectName());
 	}
 
 }

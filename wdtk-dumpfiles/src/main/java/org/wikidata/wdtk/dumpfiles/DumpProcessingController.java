@@ -80,9 +80,9 @@ import org.wikidata.wdtk.util.WebResourceFetcherImpl;
  * <p>
  * The controller will also catch exceptions that may occur when trying to
  * download and read dump files. They will be turned into logged errors.
- *
+ * 
  * @author Markus Kroetzsch
- *
+ * 
  */
 public class DumpProcessingController {
 
@@ -91,9 +91,9 @@ public class DumpProcessingController {
 
 	/**
 	 * Helper value class to store the registration settings of one listener.
-	 *
+	 * 
 	 * @author Markus Kroetzsch
-	 *
+	 * 
 	 */
 	class ListenerRegistration {
 		final String model;
@@ -184,7 +184,7 @@ public class DumpProcessingController {
 	 * name. By default, the dump file directory will be assumed to be in the
 	 * current directory and the object will access the Web to fetch the most
 	 * recent files.
-	 *
+	 * 
 	 * @param projectName
 	 *            Wikimedia projectname, e.g., "wikidatawiki" or "enwiki"
 	 */
@@ -206,7 +206,7 @@ public class DumpProcessingController {
 	 * Sets the directory where dumpfiles are stored locally. If it does not
 	 * exist yet, this directory will be created. Dumpfiles will later be stored
 	 * in a subdirectory "dumpfiles", but this will only be created when needed.
-	 *
+	 * 
 	 * @param downloadDirectory
 	 *            the download base directory
 	 * @throws IOException
@@ -221,7 +221,7 @@ public class DumpProcessingController {
 
 	/**
 	 * Disables or enables Web access.
-	 *
+	 * 
 	 * @param offlineModeEnabled
 	 *            if true, all Web access is disabled and only local files will
 	 *            be processed
@@ -243,7 +243,7 @@ public class DumpProcessingController {
 	 * {@link MwRevisionProcessor#processRevision(MwRevision)}, but it will not
 	 * be permanent. If the data is to be retained permanently, the revision
 	 * processor needs to make its own copy.
-	 *
+	 * 
 	 * @param mwRevisionProcessor
 	 *            the revision processor to register
 	 * @param model
@@ -266,7 +266,7 @@ public class DumpProcessingController {
 	/**
 	 * Registers an EntityDocumentProcessor, which will henceforth be notified
 	 * of all entity documents that are encountered in the dump.
-	 *
+	 * 
 	 * @param entityDocumentProcessor
 	 *            the entity document processor to register
 	 * @param model
@@ -297,7 +297,7 @@ public class DumpProcessingController {
 	/**
 	 * Processes the most recent dump of the sites table to extract information
 	 * about registered sites.
-	 *
+	 * 
 	 * @return a Sites objects that contains the extracted information
 	 * @throws IOException
 	 *             if there was a problem accessing the sites table dump or the
@@ -323,7 +323,7 @@ public class DumpProcessingController {
 	 * Processes all relevant page revision dumps in order. The registered
 	 * listeners (MwRevisionProcessor or EntityDocumentProcessor objects) will
 	 * be notified of all data they registered for.
-	 *
+	 * 
 	 * @see DumpProcessingController#processMostRecentDailyDump()
 	 * @see DumpProcessingController#processMostRecentMainDump()
 	 * @see DumpProcessingController#processMostRecentDump(DumpContentType,
@@ -353,7 +353,7 @@ public class DumpProcessingController {
 	 * than the main dumps. The registered listeners (MwRevisionProcessor or
 	 * EntityDocumentProcessor objects) will be notified of all data they
 	 * registered for.
-	 *
+	 * 
 	 * @see DumpProcessingController#processMostRecentMainDump()
 	 * @see DumpProcessingController#processAllRecentRevisionDumps()
 	 * @see DumpProcessingController#processMostRecentDump(DumpContentType,
@@ -376,7 +376,7 @@ public class DumpProcessingController {
 	 * dumps will miss some (random) revisions, thus reflecting a state that the
 	 * wiki has never really been in. If this is considered a problem, then it
 	 * is better to use this method instead.
-	 *
+	 * 
 	 * @see DumpProcessingController#processMostRecentDailyDump()
 	 * @see DumpProcessingController#processAllRecentRevisionDumps()
 	 * @see DumpProcessingController#processMostRecentDump(DumpContentType,
@@ -407,7 +407,7 @@ public class DumpProcessingController {
 	 * dumps will miss some (random) revisions, thus reflecting a state that the
 	 * wiki has never really been in. If this is considered a problem, then it
 	 * is better to use this method instead.
-	 *
+	 * 
 	 * @see DumpProcessingController#processMostRecentDailyDump()
 	 * @see DumpProcessingController#processAllRecentRevisionDumps()
 	 * @see DumpProcessingController#processMostRecentDump(DumpContentType,
@@ -418,13 +418,36 @@ public class DumpProcessingController {
 	}
 
 	/**
+	 * Searches for the most recent dump file of type dumpContentType and
+	 * returns a {@link MwDumpFileMetaData} object which contains meta data
+	 * information about this dump file.
+	 * 
+	 * @param dumpContentType
+	 * @return {@link MwDumpFileMetaData} object of the most recent dump file
+	 */
+	public MwDumpFileMetaData getMetaDataAboutDump(
+			DumpContentType dumpContentType) {
+		WmfDumpFileManager wmfDumpFileManager;
+		try {
+			wmfDumpFileManager = getWmfDumpFileManager();
+		} catch (IOException e) {
+			logger.error("Could not create dump file manager to receive metadata: "
+					+ e.toString());
+			return null;
+		}
+
+		return wmfDumpFileManager.findMostRecentDump(dumpContentType)
+				.getMetaData();
+	}
+
+	/**
 	 * Processes the most recent dump of the given type using the given dump
 	 * processor.
-	 *
+	 * 
 	 * @see DumpProcessingController#processMostRecentMainDump()
 	 * @see DumpProcessingController#processMostRecentDailyDump()
 	 * @see DumpProcessingController#processAllRecentRevisionDumps()
-	 *
+	 * 
 	 * @param dumpContentType
 	 *            the type of dump to process
 	 * @param dumpFileProcessor
@@ -450,7 +473,7 @@ public class DumpProcessingController {
 	/**
 	 * Processes one dump file with the given dump file processor, handling
 	 * exceptions appropriately.
-	 *
+	 * 
 	 * @param dumpFile
 	 *            the dump file to process
 	 * @param dumpFileProcessor
@@ -480,7 +503,7 @@ public class DumpProcessingController {
 	 * preferable.
 	 * <p>
 	 * This dump file manager will not be updated if the settings change later.
-	 *
+	 * 
 	 * @return a WmfDumpFileManager for the current settings
 	 * @throws IOException
 	 *             if there was a problem, usually owing to some problem when
@@ -494,7 +517,7 @@ public class DumpProcessingController {
 	/**
 	 * Return the main dump file processor that should be used to process
 	 * revisions.
-	 *
+	 * 
 	 * @return the main MwDumpFileProcessor for revisions
 	 */
 	MwDumpFileProcessor getRevisionDumpFileProcessor() {
@@ -504,7 +527,7 @@ public class DumpProcessingController {
 	/**
 	 * Return the main dump file processor that should be used to process the
 	 * content of JSON dumps.
-	 *
+	 * 
 	 * @return the main MwDumpFileProcessor for JSON
 	 */
 	MwDumpFileProcessor getJsonDumpFileProcessor() {

@@ -26,6 +26,7 @@ import java.io.OutputStream;
 
 import org.wikidata.wdtk.datamodel.interfaces.Sites;
 import org.wikidata.wdtk.datamodel.json.JsonSerializer;
+import org.wikidata.wdtk.dumpfiles.DumpContentType;
 import org.wikidata.wdtk.dumpfiles.DumpProcessingController;
 import org.wikidata.wdtk.dumpfiles.MwRevision;
 
@@ -59,7 +60,9 @@ public class JsonConfiguration extends OutputConfiguration {
 		if (this.outputDestination.equals("")) {
 			setDefaultDestination();
 		}
-		OutputStream outputStream = getCompressorOutputStream();
+
+		OutputStream outputStream = getCompressorOutputStream(dumpProcessingController
+				.getMetaDataAboutDump(DumpContentType.JSON));
 
 		// Create an object for managing the serialization process
 		JsonSerializer serializer = new JsonSerializer(outputStream);

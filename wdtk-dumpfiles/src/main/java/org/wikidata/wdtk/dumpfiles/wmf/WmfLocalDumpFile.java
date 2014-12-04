@@ -96,7 +96,7 @@ public class WmfLocalDumpFile extends WmfDumpFile {
 	@Override
 	public InputStream getDumpFileStream() throws IOException {
 		String dumpFileName = WmfDumpFile.getDumpFileName(this.dumpContentType,
-				this.projectName, this.dateStamp);
+				this.metaData.getProjectName(), this.metaData.getDateStamp());
 
 		return this.localDumpfileDirectoryManager.getInputStreamForFile(
 				dumpFileName,
@@ -111,8 +111,8 @@ public class WmfLocalDumpFile extends WmfDumpFile {
 	@Override
 	protected boolean fetchIsDone() {
 		return this.localDumpfileDirectoryManager.hasFile(WmfDumpFile
-				.getDumpFileName(this.dumpContentType, this.projectName,
-						this.dateStamp));
+				.getDumpFileName(this.dumpContentType, this.metaData.getProjectName(),
+						this.metaData.getDateStamp()));
 	}
 
 }

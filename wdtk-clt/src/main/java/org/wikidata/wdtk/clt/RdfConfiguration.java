@@ -25,6 +25,7 @@ import java.io.OutputStream;
 
 import org.openrdf.rio.RDFFormat;
 import org.wikidata.wdtk.datamodel.interfaces.Sites;
+import org.wikidata.wdtk.dumpfiles.DumpContentType;
 import org.wikidata.wdtk.dumpfiles.DumpProcessingController;
 import org.wikidata.wdtk.dumpfiles.MwRevision;
 import org.wikidata.wdtk.rdf.RdfSerializer;
@@ -130,7 +131,7 @@ public class RdfConfiguration extends OutputConfiguration {
 			DumpProcessingController dumpProcessingController, Sites sites,
 			int tasks) throws IOException {
 
-		OutputStream exportOutputStream = getCompressorOutputStream();
+		OutputStream exportOutputStream = getCompressorOutputStream(dumpProcessingController.getMetaDataAboutDump(DumpContentType.JSON));
 
 		RdfSerializer serializer = new RdfSerializer(RDFFormat.NTRIPLES,
 				exportOutputStream, sites);

@@ -66,7 +66,7 @@ public class WmfOnlineStandardDumpFileTest {
 		assertEquals(br.readLine(), "Line1");
 		assertEquals(br.readLine(), null);
 		assertTrue(dump.isAvailable());
-		assertEquals("20140210", dump.getDateStamp());
+		assertEquals("20140210", dump.getMetaData().getDateStamp());
 		assertEquals(DumpContentType.CURRENT, dump.getDumpContentType());
 	}
 
@@ -89,7 +89,7 @@ public class WmfOnlineStandardDumpFileTest {
 		assertEquals(br.readLine(), "Line1");
 		assertEquals(br.readLine(), null);
 		assertTrue(dump.isAvailable());
-		assertEquals("20140210", dump.getDateStamp());
+		assertEquals("20140210", dump.getMetaData().getDateStamp());
 		assertEquals(DumpContentType.CURRENT, dump.getDumpContentType());
 	}
 
@@ -99,7 +99,7 @@ public class WmfOnlineStandardDumpFileTest {
 				"wikidatawiki", wrf, dm, DumpContentType.FULL);
 
 		assertTrue(!dump.isAvailable());
-		assertEquals("20140210", dump.getDateStamp());
+		assertEquals("20140210", dump.getMetaData().getDateStamp());
 	}
 
 	@Test
@@ -130,7 +130,7 @@ public class WmfOnlineStandardDumpFileTest {
 				"wikidatawiki", wrf, dm, DumpContentType.FULL);
 
 		assertTrue(!dump.isAvailable());
-		assertEquals("20140210", dump.getDateStamp());
+		assertEquals("20140210", dump.getMetaData().getDateStamp());
 		assertEquals(DumpContentType.FULL, dump.getDumpContentType());
 	}
 

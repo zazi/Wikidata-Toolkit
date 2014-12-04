@@ -43,7 +43,7 @@ public abstract class WmfDumpFile implements MwDumpFile {
 	 * The default URL of the website to obtain the dump files from.
 	 */
 	protected static final String DUMP_SITE_BASE_URL = "http://dumps.wikimedia.org/";
-
+	
 	/**
 	 * Hash map defining the relative Web directory of each type of dump.
 	 */
@@ -102,23 +102,12 @@ public abstract class WmfDumpFile implements MwDumpFile {
 		WmfDumpFile.REVISION_DUMP.put(DumpContentType.JSON, false);
 	}
 
-	protected final String dateStamp;
-	protected final String projectName;
+	protected final WmfDumpFileMetadata metaData;
+
 	Boolean isDone;
 
 	public WmfDumpFile(String dateStamp, String projectName) {
-		this.dateStamp = dateStamp;
-		this.projectName = projectName;
-	}
-
-	@Override
-	public String getProjectName() {
-		return this.projectName;
-	}
-
-	@Override
-	public String getDateStamp() {
-		return this.dateStamp;
+		this.metaData = new WmfDumpFileMetadata(dateStamp, projectName);
 	}
 
 	@Override
@@ -131,9 +120,9 @@ public abstract class WmfDumpFile implements MwDumpFile {
 
 	@Override
 	public String toString() {
-		return this.projectName + "-"
+		return this.metaData.getProjectName() + "-"
 				+ getDumpContentType().toString().toLowerCase() + "-"
-				+ this.dateStamp;
+				+ this.metaData.getDateStamp();
 	}
 
 	@Override
@@ -296,6 +285,10 @@ public abstract class WmfDumpFile implements MwDumpFile {
 			throw new IllegalArgumentException("Unsupported dump type "
 					+ dumpContentType);
 		}
+	}
+	
+	public WmfDumpFileMetadata getMetaData(){
+		return this.metaData;
 	}
 
 }

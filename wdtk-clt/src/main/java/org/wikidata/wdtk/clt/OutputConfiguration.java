@@ -14,8 +14,11 @@ import java.nio.file.Paths;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wikidata.wdtk.datamodel.interfaces.Sites;
 import org.wikidata.wdtk.dumpfiles.DumpProcessingController;
+import org.wikidata.wdtk.dumpfiles.MwDumpFileMetaData;
 
 /*
  * #%L
@@ -54,7 +57,11 @@ public abstract class OutputConfiguration {
 	String outputDestination = "";
 	String compressionExtension = ConversionClient.COMPRESS_NONE;
 	Boolean useStdout = false;
+	
+	static final Logger logger = LoggerFactory
+			.getLogger(ConversionClient.class);
 
+	
 	/**
 	 * Constructor. It takes an instance of {@link ConversionProperties} to get
 	 * access to additional general arguments.
@@ -120,7 +127,7 @@ public abstract class OutputConfiguration {
 	public void setUseStdout(Boolean useStdout) {
 		this.useStdout = useStdout;
 	}
-
+	
 	/**
 	 * Creates an compressing {@link OutputStream}. The filename of the
 	 * output-file will be ignored if useStdout equals true. The compression
@@ -130,7 +137,7 @@ public abstract class OutputConfiguration {
 	 * @throws IOException
 	 */
 	@SuppressWarnings("resource")
-	protected OutputStream getCompressorOutputStream() throws IOException {
+	protected OutputStream getCompressorOutputStream(MwDumpFileMetaData metaData) throws IOException {
 		if (this.useStdout) {
 			return System.out;
 		} else {
@@ -139,9 +146,12 @@ public abstract class OutputConfiguration {
 			if (outputDirectory != null) {
 				new File(outputDirectory.toString()).mkdirs();
 			}
+			String fileName = replaceWildcards(metaData);
+			
+			fileName.concat(this.compressionExtension);
+			
 			OutputStream bufferedFileOutputStream = new BufferedOutputStream(
-					new FileOutputStream(this.outputDestination
-							+ this.compressionExtension), 1024 * 1024 * 5);
+					new FileOutputStream(fileName), 1024 * 1024 * 5);
 
 			OutputStream compressorOutputStream = null;
 			switch (this.compressionExtension) {
@@ -225,5 +235,23 @@ public abstract class OutputConfiguration {
 			}
 		}, "async-output-stream").start();
 		return pos;
+	}
+	
+	/**
+	 * Parses wildcards for date stamp and projectname in the output file name.
+	 * 
+	 * @param metaData
+	 * @return output file name
+	 */
+	String replaceWildcards(MwDumpFileMetaData metaData){
+		String result = this.outputDestination;
+
+		result = result.replace("<project_name>", metaData.getProjectName());
+		result = result.replace("<date_stamp>", metaData.getDateStamp());
+		result = result.replace("\\\\", "\\");
+		result = result.replace("\\<", "<");
+		result = result.replace("\\>", ">");
+		
+		return result;
 	}
 }

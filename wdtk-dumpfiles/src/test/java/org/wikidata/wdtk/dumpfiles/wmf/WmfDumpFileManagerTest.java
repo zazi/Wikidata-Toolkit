@@ -135,7 +135,7 @@ public class WmfDumpFileManagerTest {
 		for (int i = 0; i < dumpFiles.size(); i++) {
 			assertEquals(dumpFiles.get(i).getDumpContentType(),
 					DumpContentType.DAILY);
-			assertEquals(dumpFiles.get(i).getDateStamp(), dumpDates[i]);
+			assertEquals(dumpFiles.get(i).getMetaData().getDateStamp(), dumpDates[i]);
 			if (dumpIsLocal[i]) {
 				assertTrue(
 						"Dumpfile " + dumpFiles.get(i) + " should be local.",
@@ -174,7 +174,7 @@ public class WmfDumpFileManagerTest {
 		for (int i = 0; i < dumpFiles.size(); i++) {
 			assertEquals(dumpFiles.get(i).getDumpContentType(),
 					DumpContentType.CURRENT);
-			assertEquals(dumpFiles.get(i).getDateStamp(), dumpDates[i]);
+			assertEquals(dumpFiles.get(i).getMetaData().getDateStamp(), dumpDates[i]);
 			if (dumpIsLocal[i]) {
 				assertTrue(dumpFiles.get(i) instanceof WmfLocalDumpFile);
 			} else {
@@ -209,7 +209,7 @@ public class WmfDumpFileManagerTest {
 		for (int i = 0; i < dumpFiles.size(); i++) {
 			assertEquals(dumpFiles.get(i).getDumpContentType(),
 					DumpContentType.FULL);
-			assertEquals(dumpFiles.get(i).getDateStamp(), dumpDates[i]);
+			assertEquals(dumpFiles.get(i).getMetaData().getDateStamp(), dumpDates[i]);
 			if (dumpIsLocal[i]) {
 				assertTrue(dumpFiles.get(i) instanceof WmfLocalDumpFile);
 			} else {
@@ -235,7 +235,7 @@ public class WmfDumpFileManagerTest {
 		for (int i = 0; i < dumpFiles.size(); i++) {
 			assertEquals(dumpFiles.get(i).getDumpContentType(),
 					DumpContentType.DAILY);
-			assertEquals(dumpFiles.get(i).getDateStamp(), dumpDates[i]);
+			assertEquals(dumpFiles.get(i).getMetaData().getDateStamp(), dumpDates[i]);
 			assertTrue(dumpFiles.get(i) instanceof WmfLocalDumpFile);
 		}
 	}
@@ -257,7 +257,7 @@ public class WmfDumpFileManagerTest {
 		for (int i = 0; i < dumpFiles.size(); i++) {
 			assertEquals(dumpFiles.get(i).getDumpContentType(),
 					DumpContentType.CURRENT);
-			assertEquals(dumpFiles.get(i).getDateStamp(), dumpDates[i]);
+			assertEquals(dumpFiles.get(i).getMetaData().getDateStamp(), dumpDates[i]);
 			assertTrue(dumpFiles.get(i) instanceof WmfLocalDumpFile);
 		}
 	}
@@ -279,7 +279,7 @@ public class WmfDumpFileManagerTest {
 		for (int i = 0; i < dumpFiles.size(); i++) {
 			assertEquals(dumpFiles.get(i).getDumpContentType(),
 					DumpContentType.FULL);
-			assertEquals(dumpFiles.get(i).getDateStamp(), dumpDates[i]);
+			assertEquals(dumpFiles.get(i).getMetaData().getDateStamp(), dumpDates[i]);
 			assertTrue(dumpFiles.get(i) instanceof WmfLocalDumpFile);
 		}
 	}
@@ -321,7 +321,7 @@ public class WmfDumpFileManagerTest {
 				assertEquals(dumpFiles.get(i).getDumpContentType(),
 						DumpContentType.DAILY);
 			}
-			assertEquals(dumpFiles.get(i).getDateStamp(), dumpDates[i]);
+			assertEquals(dumpFiles.get(i).getMetaData().getDateStamp(), dumpDates[i]);
 			if (dumpIsLocal[i]) {
 				assertTrue(dumpFiles.get(i) instanceof WmfLocalDumpFile);
 			} else {
@@ -344,7 +344,7 @@ public class WmfDumpFileManagerTest {
 		assertEquals(dumpFiles.size(), 1);
 		assertEquals(dumpFiles.get(0).getDumpContentType(),
 				DumpContentType.DAILY);
-		assertEquals(dumpFiles.get(0).getDateStamp(), "20140220");
+		assertEquals(dumpFiles.get(0).getMetaData().getDateStamp(), "20140220");
 		assertTrue(dumpFiles.get(0) instanceof WmfLocalDumpFile);
 	}
 
