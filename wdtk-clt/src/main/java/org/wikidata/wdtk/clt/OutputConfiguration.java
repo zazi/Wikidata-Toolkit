@@ -141,17 +141,18 @@ public abstract class OutputConfiguration {
 		if (this.useStdout) {
 			return System.out;
 		} else {
-			Path outputDirectory = Paths.get(this.outputDestination)
+			String parsedOutputDestination = replaceWildcards(metaData);
+			
+			Path outputDirectory = Paths.get(parsedOutputDestination)
 					.getParent();
 			if (outputDirectory != null) {
 				new File(outputDirectory.toString()).mkdirs();
 			}
-			String fileName = replaceWildcards(metaData);
 			
-			fileName.concat(this.compressionExtension);
+			parsedOutputDestination.concat(this.compressionExtension);
 			
 			OutputStream bufferedFileOutputStream = new BufferedOutputStream(
-					new FileOutputStream(fileName), 1024 * 1024 * 5);
+					new FileOutputStream(parsedOutputDestination), 1024 * 1024 * 5);
 
 			OutputStream compressorOutputStream = null;
 			switch (this.compressionExtension) {
