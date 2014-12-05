@@ -1,10 +1,5 @@
 package org.wikidata.wdtk.storage.endpoint.rmi_server;
 
-/**
- * This class implements a watchdog thread for a {@link DefaultQueryService}.
- * @author Fredo Erxleben
- *
- */
 class QueryServiceWorkerThread implements Runnable {
 
 	// TODO make waitTimeout configurable

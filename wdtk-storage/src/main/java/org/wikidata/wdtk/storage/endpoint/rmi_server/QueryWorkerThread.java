@@ -15,6 +15,9 @@ import org.wikidata.wdtk.storage.endpoint.shared.WdtkQueryResult;
 import org.wikidata.wdtk.storage.endpoint.shared.WdtkQueryState;
 import org.wikidata.wdtk.storage.wdtkbindings.WdtkDatabaseManager;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * This class handles the forwarding of the query to the database and the
  * collection or results.
@@ -30,6 +33,8 @@ import org.wikidata.wdtk.storage.wdtkbindings.WdtkDatabaseManager;
  */
 public class QueryWorkerThread implements Callable<List<WdtkQueryResult>> {
 
+	// FIXME part of the ItemDocument serialization hack
+	private static ObjectMapper mapper = new ObjectMapper();
 	static Logger logger = LoggerFactory.getLogger(QueryWorkerThread.class);
 	private QueryInformation qInformation;
 
@@ -48,8 +53,7 @@ public class QueryWorkerThread implements Callable<List<WdtkQueryResult>> {
 			this.handleQuery(this.qInformation.getQuery());
 		}
 
-		logger.debug("Done handling query for query {}",
-				qInformation.getQuery());
+		logger.debug("Done handling query for query {}", qInformation.getQuery());
 		return qInformation.getResults();
 	}
 
@@ -84,16 +88,23 @@ public class QueryWorkerThread implements Callable<List<WdtkQueryResult>> {
 		EntityDocument resultItem = dbManager.getEntityDocument(Datamodel
 				.makeWikidataItemIdValue(itemId));
 		logger.debug("DB entry retrieved");
-
-		if (resultItem instanceof ItemDocument) {
-			WdtkQueryResult queryResult = new WdtkItemQueryResult((ItemDocument) resultItem);
-			qInformation.addResult(queryResult);
+		
+		if(resultItem instanceof ItemDocument){
+			WdtkQueryResult queryResult;
+			try {
+				queryResult = new WdtkItemQueryResult(mapper.writeValueAsString(resultItem));
+				qInformation.addResult(queryResult);
+				logger.debug("Query result written");
+			} catch (JsonProcessingException e) {
+				logger.error(e.getMessage());
+				e.printStackTrace();
+			}
 			qInformation.setState(WdtkQueryState.COMPLETE);
 		} else {
 			logger.error("Query for an item returned no ItemDocument");
 			qInformation.setState(WdtkQueryState.INVALID);
 		}
-
+		
 	}
 
 }

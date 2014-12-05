@@ -47,11 +47,14 @@ public class WdtkRmiClient {
 			this.connected = true;
 
 		} catch (AccessException e) {
-			logger.error("Access Exception: {}", e.getMessage());
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (RemoteException e) {
-			logger.error("Remote Exception: {}", e.getMessage());
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (NotBoundException e) {
-			logger.error("NotBound Exception: {}", e.getMessage());
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

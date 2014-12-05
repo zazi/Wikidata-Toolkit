@@ -42,7 +42,7 @@ public class DefaultQueryService implements WdtkQueryService {
 	private int servicePort = 1098;
 
 	private static final String DB_NAME = "wdtkDatabaseFull-20141013";
-	private transient static final WdtkDatabaseManager WDTK_DB_MANAGER = new WdtkDatabaseManager(
+	private static final WdtkDatabaseManager WDTK_DB_MANAGER = new WdtkDatabaseManager(
 			DB_NAME);
 
 	static WdtkDatabaseManager getDatabaseManger() {
@@ -132,7 +132,8 @@ public class DefaultQueryService implements WdtkQueryService {
 			return WdtkQueryState.NO_SUCH_QUERY;
 		}
 		WdtkQueryState state = qInformation.getState();
-		logger.debug("(REQ) State of query #{}: {} ({} results available)", identifier, state, qInformation.getResults().size());
+		logger.debug("(REQ) State of query #{}: {}", identifier, state);
+		logger.debug("Results: {}", qInformation.getResults());
 		return state;
 	}
 
