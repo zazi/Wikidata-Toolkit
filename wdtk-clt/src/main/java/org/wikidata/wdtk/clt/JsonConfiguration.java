@@ -90,7 +90,15 @@ public class JsonConfiguration extends OutputConfiguration {
 
 	@Override
 	public void closeSerializer() {
-		// TODO Auto-generated method stub
+		// TODO use an outputDestination where the wildcards are parsed!
+		String message = "*** Finished serialization of "
+				+ this.parsedOutputDestination;
+		if (this.conversionProperties.printReport) {
+			this.conversionProperties.appendToReport(message + "\n");
+		}
+		if (this.conversionProperties.useStdOut == false) {
+			System.out.println(message);
+		}
 
 	}
 

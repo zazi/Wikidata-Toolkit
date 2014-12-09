@@ -204,6 +204,13 @@ public class ConversionClient {
 		for (OutputConfiguration configuration : this.configurations) {
 			configuration.closeSerializer();
 		}
+		if (this.conversionProperties.getPrintReport()){
+			try {
+				this.conversionProperties.printReport();
+			} catch (IOException e) {
+				logger.error("Could not print report!");
+			}
+		}
 	}
 
 	/**

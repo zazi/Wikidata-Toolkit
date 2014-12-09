@@ -20,7 +20,10 @@ package org.wikidata.wdtk.clt;
  * #L%
  */
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,8 +61,11 @@ public class ConversionProperties {
 	// some global configuration parameters
 	Boolean offlineMode = false;
 	String dumplocation = null;
-
 	Boolean useStdOut = false;
+	Boolean printReport = false;
+	String reportFileName = "report.txt";
+
+	String finalReport = "";
 
 	/**
 	 * Constructor.
@@ -86,7 +92,7 @@ public class ConversionProperties {
 						"place the output into the directory located at <path>")
 				.withLongOpt("destination").create("d");
 		Option dumplocation = OptionBuilder.withArgName("path").hasArg()
-				.withDescription("define the location of the dumpfiles")
+				.withDescription("define the location of the dump files")
 				.withLongOpt("dumplocation").create("l");
 		Option config = OptionBuilder
 				.withArgName("file")
@@ -103,13 +109,18 @@ public class ConversionProperties {
 				.withDescription(
 						"define a compression format. Supported formats: .bz2, .gz")
 				.withLongOpt("compression").create("e");
-
+		Option printReportFile = OptionBuilder
+				.withArgName("file name")
+				.withDescription(
+						"create a final report that includes the names of dump files which are generated successfully and the numbers of triples (for the rdf dumps) after the dump generation")
+				.withLongOpt("report").create("cr");
 		options.addOption(config);
 		options.addOption(format);
 		options.addOption(destination);
 		options.addOption(dumplocation);
 		options.addOption(compressionExtention);
 		options.addOption(rdfdump);
+		options.addOption(printReportFile);
 		options.addOption(
 				"n",
 				"offline",
@@ -207,6 +218,37 @@ public class ConversionProperties {
 		this.offlineMode = offlineMode;
 	}
 
+	public Boolean getPrintReport() {
+		return this.printReport;
+	}
+
+	public void setPrintReport(Boolean printReport) {
+		this.printReport = printReport;
+	}
+
+	public String getReportFileName() {
+		return this.reportFileName;
+	}
+
+	public void setReportFileName(String reportFileName) {
+		this.reportFileName = reportFileName;
+	}
+
+	public void clearReport() {
+		this.finalReport = "";
+	}
+
+	public void printReport() throws IOException {
+		File reportFile = new File(this.reportFileName);
+		BufferedWriter writer = new BufferedWriter(new FileWriter(reportFile));
+		writer.write(this.finalReport);
+		writer.close();
+	}
+
+	public void appendToReport(String output) {
+		this.finalReport = this.finalReport.concat(output);
+	}
+
 	/**
 	 * Analyses the content of the general section of an ini configuration file
 	 * and fills out the class arguments with this data.
@@ -225,6 +267,9 @@ public class ConversionProperties {
 			case "dumplocation":
 				this.dumplocation = section.get(key);
 				break;
+			case "report":
+				this.printReport = true;
+				this.reportFileName = section.get(key);
 			default:
 				logger.warn("Unrecognized option: " + key);
 			}
@@ -247,6 +292,11 @@ public class ConversionProperties {
 
 		if (cmd.hasOption("n")) {
 			this.offlineMode = true;
+		}
+
+		if (cmd.hasOption("rc")) {
+			this.printReport = true;
+			this.reportFileName = cmd.getOptionValue("rc");
 		}
 	}
 

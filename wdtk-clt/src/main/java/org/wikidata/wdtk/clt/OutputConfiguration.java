@@ -54,14 +54,16 @@ public abstract class OutputConfiguration {
 
 	ConversionProperties conversionProperties;
 
-	String outputDestination = "";
+	// output configuration arguement
+	String outputDestination = ""; // with wildcards
 	String compressionExtension = ConversionClient.COMPRESS_NONE;
 	Boolean useStdout = false;
-	
+
+	String parsedOutputDestination = ""; // wildcards already replaced
+
 	static final Logger logger = LoggerFactory
 			.getLogger(ConversionClient.class);
 
-	
 	/**
 	 * Constructor. It takes an instance of {@link ConversionProperties} to get
 	 * access to additional general arguments.
@@ -127,7 +129,7 @@ public abstract class OutputConfiguration {
 	public void setUseStdout(Boolean useStdout) {
 		this.useStdout = useStdout;
 	}
-	
+
 	/**
 	 * Creates an compressing {@link OutputStream}. The filename of the
 	 * output-file will be ignored if useStdout equals true. The compression
@@ -137,22 +139,25 @@ public abstract class OutputConfiguration {
 	 * @throws IOException
 	 */
 	@SuppressWarnings("resource")
-	protected OutputStream getCompressorOutputStream(MwDumpFileMetaData metaData) throws IOException {
+	protected OutputStream getCompressorOutputStream(MwDumpFileMetaData metaData)
+			throws IOException {
 		if (this.useStdout) {
 			return System.out;
 		} else {
-			String parsedOutputDestination = replaceWildcards(metaData);
-			
+			parsedOutputDestination = replaceWildcards(metaData);
+
 			Path outputDirectory = Paths.get(parsedOutputDestination)
 					.getParent();
 			if (outputDirectory != null) {
 				new File(outputDirectory.toString()).mkdirs();
 			}
-			
-			parsedOutputDestination.concat(this.compressionExtension);
-			
+
+			parsedOutputDestination = parsedOutputDestination
+					.concat(this.compressionExtension);
+
 			OutputStream bufferedFileOutputStream = new BufferedOutputStream(
-					new FileOutputStream(parsedOutputDestination), 1024 * 1024 * 5);
+					new FileOutputStream(parsedOutputDestination),
+					1024 * 1024 * 5);
 
 			OutputStream compressorOutputStream = null;
 			switch (this.compressionExtension) {
@@ -237,14 +242,14 @@ public abstract class OutputConfiguration {
 		}, "async-output-stream").start();
 		return pos;
 	}
-	
+
 	/**
 	 * Parses wildcards for date stamp and projectname in the output file name.
 	 * 
 	 * @param metaData
 	 * @return output file name
 	 */
-	String replaceWildcards(MwDumpFileMetaData metaData){
+	String replaceWildcards(MwDumpFileMetaData metaData) {
 		String result = this.outputDestination;
 
 		result = result.replace("<project_name>", metaData.getProjectName());
@@ -252,7 +257,7 @@ public abstract class OutputConfiguration {
 		result = result.replace("\\\\", "\\");
 		result = result.replace("\\<", "<");
 		result = result.replace("\\>", ">");
-		
+
 		return result;
 	}
 }

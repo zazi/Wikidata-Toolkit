@@ -102,6 +102,7 @@ public class ConversionPropertiesTest {
 		HelpFormatter formatter = new HelpFormatter();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		PrintWriter writer = new PrintWriter(out);
+		formatter.printHelp("ConversionClient", ConversionProperties.options);
 		formatter.printHelp(writer, 1000, "ConversionClient", "",
 				ConversionProperties.options, 0, 3, "");
 		writer.close();

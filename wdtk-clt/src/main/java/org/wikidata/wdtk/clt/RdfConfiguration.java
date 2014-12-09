@@ -131,7 +131,8 @@ public class RdfConfiguration extends OutputConfiguration {
 			DumpProcessingController dumpProcessingController, Sites sites,
 			int tasks) throws IOException {
 
-		OutputStream exportOutputStream = getCompressorOutputStream(dumpProcessingController.getMetaDataAboutDump(DumpContentType.JSON));
+		OutputStream exportOutputStream = getCompressorOutputStream(dumpProcessingController
+				.getMetaDataAboutDump(DumpContentType.JSON));
 
 		RdfSerializer serializer = new RdfSerializer(RDFFormat.NTRIPLES,
 				exportOutputStream, sites);
@@ -162,9 +163,17 @@ public class RdfConfiguration extends OutputConfiguration {
 	@Override
 	public void closeSerializer() {
 		serializer.close();
-		System.out.println("*** Finished serialization of "
+		//TODO use an outputDestination where the wildcards are parsed!
+		String message = "*** Finished serialization of "
 				+ serializer.getTripleCount() + " RDF triples in file "
-				+ this.outputDestination);
+				+ this.parsedOutputDestination;
+		if (this.conversionProperties.printReport) {
+			this.conversionProperties.appendToReport(message + "\n");
+		}
+		if (this.conversionProperties.useStdOut == false) {
+			System.out.println(message);
+		}
+
 	}
 
 }
