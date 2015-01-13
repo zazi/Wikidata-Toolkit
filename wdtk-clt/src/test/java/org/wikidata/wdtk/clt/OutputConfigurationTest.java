@@ -44,5 +44,12 @@ public class OutputConfigurationTest {
 		assertEquals(outputConfiguration.replaceWildcards(metaData), TEST_FILENAME_WITH_WILDCARDS);
 		
 	}
+	@Test
+	public void testValidateExcluders(){
+		OutputConfiguration outputConfiguration = new JsonConfiguration(new ConversionProperties());
+		assertTrue(outputConfiguration.validateExcluders(TEST_FILENAME_WITH_WILDCARDS));
+		assertTrue(outputConfiguration.validateExcluders(TEST_FILENAME_WITH_WILDCARDS2));
+		assertTrue(!outputConfiguration.validateExcluders(TEST_FILENAME_WITH_WILDCARDS2 + "\\"));
+	}
 
 }

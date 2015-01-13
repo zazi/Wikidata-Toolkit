@@ -243,6 +243,11 @@ public abstract class OutputConfiguration {
 		return pos;
 	}
 
+	boolean validateExcluders(String rawString) {
+		final String regex = "(((?!\\\\|>|<).)*((\\\\\\\\|\\\\>|\\\\<)|<((?!\\\\|>|<).)*>)((?!\\\\|>|<).)*)*|((?!\\\\|>|<).)*";
+		return rawString.matches(regex);
+	}
+
 	/**
 	 * Parses wildcards for date stamp and projectname in the output file name.
 	 * 
@@ -251,7 +256,10 @@ public abstract class OutputConfiguration {
 	 */
 	String replaceWildcards(MwDumpFileMetaData metaData) {
 		String result = this.outputDestination;
-
+		if (!validateExcluders(result)) {
+			logger.warn("Invalide usage of wildcards or excluders in the output destination path: "
+					+ this.outputDestination);
+		}
 		result = result.replace("<project_name>", metaData.getProjectName());
 		result = result.replace("<date_stamp>", metaData.getDateStamp());
 		result = result.replace("\\\\", "\\");
