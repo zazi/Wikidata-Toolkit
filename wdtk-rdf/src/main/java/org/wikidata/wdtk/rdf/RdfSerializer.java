@@ -28,22 +28,21 @@ import org.openrdf.rio.RDFHandlerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
-import org.wikidata.wdtk.datamodel.interfaces.EntityDocumentsSerializer;
+import org.wikidata.wdtk.datamodel.interfaces.EntityDocumentDumpProcessor;
 import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
 import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
 import org.wikidata.wdtk.datamodel.interfaces.Sites;
-import org.wikidata.wdtk.datamodel.json.JsonSerializer;
 
 /**
- * This class implements {@link EntityDocumentsSerializer} to provide a RDF
+ * This class implements {@link EntityDocumentDumpProcessor} to provide a RDF
  * serializer to render RDF graphs of {@link EntityDocument} objects.
  *
  * @author Michael Günther
  *
  */
-public class RdfSerializer implements EntityDocumentsSerializer {
+public class RdfSerializer implements EntityDocumentDumpProcessor {
 
-	static final Logger logger = LoggerFactory.getLogger(JsonSerializer.class);
+	static final Logger logger = LoggerFactory.getLogger(RdfSerializer.class);
 
 	public static final int TASK_STATEMENTS = 0x00000001;
 	public static final int TASK_SITELINKS = 0x00000002;
@@ -105,7 +104,7 @@ public class RdfSerializer implements EntityDocumentsSerializer {
 	}
 
 	@Override
-	public void start() {
+	public void open() {
 		try {
 			this.rdfWriter.start();
 			this.rdfConverter.writeNamespaceDeclarations();

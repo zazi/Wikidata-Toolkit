@@ -43,8 +43,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class JacksonPropertyDocument extends JacksonTermedStatementDocument implements
-		PropertyDocument {
+public class JacksonPropertyDocument extends JacksonTermedStatementDocument
+		implements PropertyDocument {
 
 	/**
 	 * Datatype string as used in JSON. See {@link JacksonDatatypeId} for a
@@ -104,11 +104,6 @@ public class JacksonPropertyDocument extends JacksonTermedStatementDocument impl
 	@Override
 	public DatatypeIdValue getDatatype() {
 		return new JacksonDatatypeId(this.datatype);
-	}
-
-	@Override
-	public String getJsonType() {
-		return JacksonTermedStatementDocument.JSON_TYPE_PROPERTY;
 	}
 
 	@Override

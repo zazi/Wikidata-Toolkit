@@ -1,16 +1,10 @@
-/**
- * Code that is related to the official Wikibase JSON format
- * as used, e.g., to export result in the Wikibase Web API.
- * 
- * @author Michael Günther
- */
-package org.wikidata.wdtk.datamodel.json;
+package org.wikidata.wdtk.datamodel.helpers;
 
 /*
  * #%L
  * Wikidata Toolkit Data Model
  * %%
- * Copyright (C) 2014 Wikidata Toolkit Developers
+ * Copyright (C) 2014 - 2015 Wikidata Toolkit Developers
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,3 +19,22 @@ package org.wikidata.wdtk.datamodel.json;
  * limitations under the License.
  * #L%
  */
+
+import static org.junit.Assert.assertFalse;
+
+import org.junit.Test;
+import org.wikidata.wdtk.datamodel.implementation.DataObjectFactoryImplTest;
+
+public class ShallowCopyHelperTest extends DataObjectFactoryImplTest {
+
+	public ShallowCopyHelperTest() {
+		this.converter.setOptionDeepCopy(false);
+	}
+
+	@Override
+	@Test
+	public void deepCopyOptionValue() {
+		assertFalse(this.converter.hasOptionDeepCopy());
+	}
+
+}

@@ -25,8 +25,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.wikidata.wdtk.datamodel.interfaces.Sites;
-import org.wikidata.wdtk.datamodel.json.JsonSerializer;
-import org.wikidata.wdtk.dumpfiles.DumpContentType;
+// import org.wikidata.wdtk.datamodel.json.JsonSerializer;
 import org.wikidata.wdtk.dumpfiles.DumpProcessingController;
 import org.wikidata.wdtk.dumpfiles.MwRevision;
 
@@ -60,19 +59,17 @@ public class JsonConfiguration extends OutputConfiguration {
 		if (this.outputDestination.equals("")) {
 			setDefaultDestination();
 		}
-
-		OutputStream outputStream = getCompressorOutputStream(dumpProcessingController
-				.getMetaDataAboutDump(DumpContentType.JSON));
+		OutputStream outputStream = getCompressorOutputStream();
 
 		// Create an object for managing the serialization process
-		JsonSerializer serializer = new JsonSerializer(outputStream);
+		// JsonSerializer serializer = new JsonSerializer(outputStream);
 
 		// Subscribe to the most recent entity documents of type wikibase item
 		// and property:
-		dumpProcessingController.registerEntityDocumentProcessor(serializer,
-				MwRevision.MODEL_WIKIBASE_ITEM, true);
-		dumpProcessingController.registerEntityDocumentProcessor(serializer,
-				MwRevision.MODEL_WIKIBASE_PROPERTY, true);
+		// dumpProcessingController.registerEntityDocumentProcessor(serializer,
+		//		MwRevision.MODEL_WIKIBASE_ITEM, true);
+		// dumpProcessingController.registerEntityDocumentProcessor(serializer,
+		//		MwRevision.MODEL_WIKIBASE_PROPERTY, true);
 	}
 
 	/**
@@ -90,15 +87,7 @@ public class JsonConfiguration extends OutputConfiguration {
 
 	@Override
 	public void closeSerializer() {
-		// TODO use an outputDestination where the wildcards are parsed!
-		String message = "*** Finished serialization of "
-				+ this.parsedOutputDestination;
-		if (this.conversionProperties.printReport) {
-			this.conversionProperties.appendToReport(message + "\n");
-		}
-		if (this.conversionProperties.useStdOut == false) {
-			System.out.println(message);
-		}
+		// TODO Auto-generated method stub
 
 	}
 

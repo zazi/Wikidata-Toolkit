@@ -89,7 +89,7 @@ public class JacksonObjectFactory implements DataObjectFactory {
 
 			JacksonValueItemId result = new JacksonValueItemId();
 			result.setValue(innerEntity);
-			result.setParentDocument(getParentItemDocument("Qunknown", siteIri));
+			result.setSiteIri(siteIri);
 			return result;
 		} else {
 			throw new IllegalArgumentException("Illegal item id: " + id);
@@ -106,7 +106,7 @@ public class JacksonObjectFactory implements DataObjectFactory {
 
 			JacksonValuePropertyId result = new JacksonValuePropertyId();
 			result.setValue(innerEntity);
-			result.setParentDocument(getParentItemDocument("Qunknown", siteIri));
+			result.setSiteIri(siteIri);
 			return result;
 		} else {
 			throw new IllegalArgumentException("Illegal property id: " + id);
@@ -131,13 +131,18 @@ public class JacksonObjectFactory implements DataObjectFactory {
 	}
 
 	@Override
-	public GlobeCoordinatesValue getGlobeCoordinatesValue(long latitude,
-			long longitude, long precision, String globeIri) {
-		JacksonInnerGlobeCoordinates innerCoordinates = new JacksonInnerGlobeCoordinates(
-				((double) latitude / GlobeCoordinatesValue.PREC_DEGREE),
-				((double) longitude / GlobeCoordinatesValue.PREC_DEGREE),
-				((double) precision / GlobeCoordinatesValue.PREC_DEGREE),
-				globeIri);
+	public GlobeCoordinatesValue getGlobeCoordinatesValue(double latitude,
+			double longitude, double precision, String globeIri) {
+		if (precision <= 0) {
+			throw new IllegalArgumentException(
+					"Coordinates precision must be non-zero positive. Given value: "
+							+ precision);
+		}
+		JacksonInnerGlobeCoordinates innerCoordinates = new JacksonInnerGlobeCoordinates();
+		innerCoordinates.setLatitude(latitude);
+		innerCoordinates.setLongitude(longitude);
+		innerCoordinates.setPrecision(precision);
+		innerCoordinates.setGlobe(globeIri);
 		JacksonValueGlobeCoordinates result = new JacksonValueGlobeCoordinates();
 		result.setValue(innerCoordinates);
 		return result;
@@ -185,11 +190,11 @@ public class JacksonObjectFactory implements DataObjectFactory {
 		result.setProperty(propertyId.getId());
 		if (value instanceof JacksonValue) {
 			return getJacksonValueSnak(propertyId, (JacksonValue) value,
-					getDefaultJsonPropertyTypeForValueType(value));
+					getJsonPropertyTypeForValueType(value));
 		} else {
 			return getJacksonValueSnak(propertyId,
 					(JacksonValue) this.dataModelConverter.copyValue(value),
-					getDefaultJsonPropertyTypeForValueType(value));
+					getJsonPropertyTypeForValueType(value));
 		}
 	}
 
@@ -197,8 +202,7 @@ public class JacksonObjectFactory implements DataObjectFactory {
 	public SomeValueSnak getSomeValueSnak(PropertyIdValue propertyId) {
 		JacksonSomeValueSnak result = new JacksonSomeValueSnak();
 		result.setProperty(propertyId.getId());
-		result.setParentDocument(getParentItemDocument("Qundefined",
-				propertyId.getSiteIri()));
+		result.setSiteIri(propertyId.getSiteIri());
 		return result;
 	}
 
@@ -206,8 +210,7 @@ public class JacksonObjectFactory implements DataObjectFactory {
 	public NoValueSnak getNoValueSnak(PropertyIdValue propertyId) {
 		JacksonNoValueSnak result = new JacksonNoValueSnak();
 		result.setProperty(propertyId.getId());
-		result.setParentDocument(getParentItemDocument("Qundefined",
-				propertyId.getSiteIri()));
+		result.setSiteIri(propertyId.getSiteIri());
 		return result;
 	}
 
@@ -281,21 +284,9 @@ public class JacksonObjectFactory implements DataObjectFactory {
 		result.setRank(rank);
 		result.setStatementId(statementId);
 
-		result.setParentDocument(getParentItemDocument(claim.getSubject()));
+		result.setSubject(claim.getSubject());
 
 		return result;
-	}
-
-	private JacksonItemDocument getParentItemDocument(EntityIdValue subject) {
-		return getParentItemDocument(subject.getId(), subject.getSiteIri());
-	}
-
-	private JacksonItemDocument getParentItemDocument(String subjectId,
-			String subjectSiteIri) {
-		JacksonItemDocument helperParentDocument = new JacksonItemDocument();
-		helperParentDocument.setJsonId(subjectId);
-		helperParentDocument.setSiteIri(subjectSiteIri);
-		return helperParentDocument;
 	}
 
 	@Override
@@ -467,18 +458,19 @@ public class JacksonObjectFactory implements DataObjectFactory {
 		result.setProperty(propertyId.getId());
 		result.setDatavalue(value);
 		result.setDatatype(propertyDatatype);
-		result.setParentDocument(getParentItemDocument("Qundefined",
-				propertyId.getSiteIri()));
+		result.setSiteIri(propertyId.getSiteIri());
 		return result;
 	}
 
-	private String getDefaultJsonPropertyTypeForValueType(Value value) {
+	private String getJsonPropertyTypeForValueType(Value value) {
 		if (value instanceof TimeValue) {
 			return JacksonDatatypeId.JSON_DT_TIME;
 		} else if (value instanceof ItemIdValue) {
 			return JacksonDatatypeId.JSON_DT_ITEM;
+		} else if (value instanceof PropertyIdValue) {
+			return JacksonDatatypeId.JSON_DT_PROPERTY;
 		} else if (value instanceof StringValue) {
-			return JacksonDatatypeId.JSON_DT_STRING;
+			return null;
 		} else if (value instanceof GlobeCoordinatesValue) {
 			return JacksonDatatypeId.JSON_DT_GLOBE_COORDINATES;
 		} else if (value instanceof QuantityValue) {
