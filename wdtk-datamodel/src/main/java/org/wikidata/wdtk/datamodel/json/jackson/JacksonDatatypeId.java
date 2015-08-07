@@ -125,7 +125,8 @@ public class JacksonDatatypeId implements DatatypeIdValue {
 	 * Constructs an object representing the datatype id from a string denoting
 	 * the datatype. It also sets the correct IRI for the datatype.
 	 * <p>
-	 * TODO Review the utility of this constructor.
+	 * TODO Review the utility of this constructor.final DatamodelConverter datamodelConverter = new DatamodelConverter(new JacksonObjectFactory());
+		datamodelConverter.
 	 *
 	 * @param jsonDatatype
 	 *            denotes the datatype which to represent; case-sensitive
@@ -161,5 +162,31 @@ public class JacksonDatatypeId implements DatatypeIdValue {
 	@Override
 	public int hashCode() {
 		return Hash.hashCode(this);
+	}
+
+	public static String fromDatatypeIdValueIri(final String datatypeIdValueIri) {
+
+		final String jacksonDatatypeId;
+
+		switch(datatypeIdValueIri) {
+
+			case DT_STRING:
+
+				jacksonDatatypeId = JSON_DT_STRING;
+
+				break;
+			case DT_ITEM:
+
+				jacksonDatatypeId = JSON_DT_ITEM;
+
+				break;
+			default:
+
+				// TODO: support more datatypes
+
+				jacksonDatatypeId = null;
+		}
+
+		return jacksonDatatypeId;
 	}
 }

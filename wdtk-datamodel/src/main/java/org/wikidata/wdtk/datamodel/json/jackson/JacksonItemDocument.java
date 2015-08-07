@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.wikidata.wdtk.datamodel.helpers.Datamodel;
+import org.wikidata.wdtk.datamodel.helpers.DatamodelConverter;
 import org.wikidata.wdtk.datamodel.helpers.Equality;
 import org.wikidata.wdtk.datamodel.helpers.Hash;
 import org.wikidata.wdtk.datamodel.helpers.ToString;
@@ -122,6 +123,7 @@ public class JacksonItemDocument extends JacksonTermedStatementDocument
 	public static JacksonItemDocument fromItemDocumentImpl(final ItemDocumentImpl itemDocument) {
 
 		final JacksonItemDocument jacksonItemDocument = new JacksonItemDocument();
+		jacksonItemDocument.setJsonId(null);
 		jacksonItemDocument.setLabels(transformMonolingualTextValues(itemDocument.getLabels()));
 		jacksonItemDocument.setDescriptions(transformMonolingualTextValues(itemDocument.getDescriptions()));
 		jacksonItemDocument.setAliases(transformMonolingualTextValueMaps(itemDocument.getAliases()));
@@ -129,29 +131,6 @@ public class JacksonItemDocument extends JacksonTermedStatementDocument
 		jacksonItemDocument.setSiteLinks(transformSiteLinks(itemDocument.getSiteLinks()));
 
 		return jacksonItemDocument;
-	}
-
-	private static Map<String, JacksonMonolingualTextValue> transformMonolingualTextValues(
-			final Map<String, MonolingualTextValue> monolingualTextValues) {
-
-		if (monolingualTextValues == null) {
-
-			return null;
-		}
-
-		final Map<String, JacksonMonolingualTextValue> jacksonMonolingualTextValues = new HashMap<>();
-
-		for (final Map.Entry<String, MonolingualTextValue> monolingualTextValueEntry : monolingualTextValues.entrySet()) {
-
-			final String monolingualTextValueKey = monolingualTextValueEntry.getKey();
-			final MonolingualTextValue monolingualTextValue = monolingualTextValueEntry.getValue();
-
-			final JacksonMonolingualTextValue jacksonMonolingualTextValue = new JacksonMonolingualTextValue(monolingualTextValue);
-
-			jacksonMonolingualTextValues.put(monolingualTextValueKey, jacksonMonolingualTextValue);
-		}
-
-		return jacksonMonolingualTextValues;
 	}
 
 	private static Map<String, List<JacksonMonolingualTextValue>> transformMonolingualTextValueMaps(

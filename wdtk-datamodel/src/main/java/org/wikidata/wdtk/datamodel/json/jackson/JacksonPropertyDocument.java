@@ -20,6 +20,9 @@ package org.wikidata.wdtk.datamodel.json.jackson;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.wikidata.wdtk.datamodel.helpers.Datamodel;
 import org.wikidata.wdtk.datamodel.helpers.Equality;
 import org.wikidata.wdtk.datamodel.helpers.Hash;
@@ -29,10 +32,6 @@ import org.wikidata.wdtk.datamodel.interfaces.DatatypeIdValue;
 import org.wikidata.wdtk.datamodel.interfaces.EntityIdValue;
 import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
 import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Jackson implementation of {@link PropertyDocument}. Like all Jackson objects,
@@ -125,7 +124,9 @@ public class JacksonPropertyDocument extends JacksonTermedStatementDocument
 	public static JacksonPropertyDocument fromPropertyDocumentImpl(final PropertyDocumentImpl propertyDocument) {
 
 		final JacksonPropertyDocument jacksonPropertyDocument = new JacksonPropertyDocument();
-		jacksonPropertyDocument.setJsonDatatype(propertyDocument.getDatatype().getIri());
+		jacksonPropertyDocument.setJsonId(null);
+		jacksonPropertyDocument.setJsonDatatype(JacksonDatatypeId.fromDatatypeIdValueIri(propertyDocument.getDatatype().getIri()));
+		jacksonPropertyDocument.setLabels(transformMonolingualTextValues(propertyDocument.getLabels()));
 
 		return jacksonPropertyDocument;
 	}

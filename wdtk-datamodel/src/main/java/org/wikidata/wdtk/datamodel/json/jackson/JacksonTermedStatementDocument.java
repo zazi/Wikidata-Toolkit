@@ -276,4 +276,27 @@ public abstract class JacksonTermedStatementDocument implements TermedDocument,
 		return new NestedIterator<>(this.getStatementGroups());
 	}
 
+	protected static Map<String, JacksonMonolingualTextValue> transformMonolingualTextValues(
+			final Map<String, MonolingualTextValue> monolingualTextValues) {
+
+		if (monolingualTextValues == null) {
+
+			return null;
+		}
+
+		final Map<String, JacksonMonolingualTextValue> jacksonMonolingualTextValues = new HashMap<>();
+
+		for (final Map.Entry<String, MonolingualTextValue> monolingualTextValueEntry : monolingualTextValues.entrySet()) {
+
+			final String monolingualTextValueKey = monolingualTextValueEntry.getKey();
+			final MonolingualTextValue monolingualTextValue = monolingualTextValueEntry.getValue();
+
+			final JacksonMonolingualTextValue jacksonMonolingualTextValue = new JacksonMonolingualTextValue(monolingualTextValue);
+
+			jacksonMonolingualTextValues.put(monolingualTextValueKey, jacksonMonolingualTextValue);
+		}
+
+		return jacksonMonolingualTextValues;
+	}
+
 }
