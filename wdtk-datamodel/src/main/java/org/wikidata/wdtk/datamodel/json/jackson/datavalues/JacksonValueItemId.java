@@ -3,6 +3,7 @@ package org.wikidata.wdtk.datamodel.json.jackson.datavalues;
 import org.wikidata.wdtk.datamodel.helpers.Equality;
 import org.wikidata.wdtk.datamodel.helpers.Hash;
 import org.wikidata.wdtk.datamodel.helpers.ToString;
+import org.wikidata.wdtk.datamodel.implementation.ItemIdValueImpl;
 import org.wikidata.wdtk.datamodel.interfaces.EntityIdValue;
 import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue;
 import org.wikidata.wdtk.datamodel.interfaces.ValueVisitor;
@@ -84,5 +85,18 @@ public class JacksonValueItemId extends JacksonValueEntityId implements
 	@Override
 	public String toString() {
 		return ToString.toString(this);
+	}
+
+	public static JacksonValueItemId fromItemIdValueImpl(final ItemIdValueImpl itemIdValue) {
+
+		final JacksonValueItemId jacksonValueItemId = new JacksonValueItemId();
+
+		final JacksonInnerEntityId jacksonInnerEntityId = new JacksonInnerEntityId(itemIdValue.getEntityType(), Integer.valueOf(itemIdValue.getId()));
+
+		jacksonValueItemId.setValue(jacksonInnerEntityId);
+		jacksonValueItemId.setType(itemIdValue.getEntityType());
+		jacksonValueItemId.setSiteIri(itemIdValue.getSiteIri());
+
+		return jacksonValueItemId;
 	}
 }

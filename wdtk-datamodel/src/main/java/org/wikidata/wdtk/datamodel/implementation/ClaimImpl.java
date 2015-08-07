@@ -60,7 +60,7 @@ public class ClaimImpl implements Claim, Serializable {
 	 *            the qualifiers of the Claim, groupd in SnakGroups
 	 */
 	ClaimImpl(EntityIdValue subject, Snak mainSnak, List<SnakGroup> qualifiers) {
-		Validate.notNull(subject, "Statement subjects cannot be null");
+		//Validate.notNull(subject, "Statement subjects cannot be null");
 		Validate.notNull(mainSnak, "Statement main Snaks cannot be null");
 		Validate.notNull(qualifiers,
 				"Statement qualifier groups cannot be null");

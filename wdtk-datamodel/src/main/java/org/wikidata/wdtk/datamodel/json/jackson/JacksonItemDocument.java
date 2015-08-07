@@ -20,22 +20,30 @@ package org.wikidata.wdtk.datamodel.json.jackson;
  * #L%
  */
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import org.wikidata.wdtk.datamodel.helpers.Datamodel;
-import org.wikidata.wdtk.datamodel.helpers.Equality;
-import org.wikidata.wdtk.datamodel.helpers.Hash;
-import org.wikidata.wdtk.datamodel.helpers.ToString;
-import org.wikidata.wdtk.datamodel.interfaces.EntityIdValue;
-import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
-import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue;
-import org.wikidata.wdtk.datamodel.interfaces.SiteLink;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.wikidata.wdtk.datamodel.helpers.Datamodel;
+import org.wikidata.wdtk.datamodel.helpers.Equality;
+import org.wikidata.wdtk.datamodel.helpers.Hash;
+import org.wikidata.wdtk.datamodel.helpers.ToString;
+import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
+import org.wikidata.wdtk.datamodel.implementation.SiteLinkImpl;
+import org.wikidata.wdtk.datamodel.implementation.StatementImpl;
+import org.wikidata.wdtk.datamodel.interfaces.EntityIdValue;
+import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
+import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue;
+import org.wikidata.wdtk.datamodel.interfaces.MonolingualTextValue;
+import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue;
+import org.wikidata.wdtk.datamodel.interfaces.SiteLink;
+import org.wikidata.wdtk.datamodel.interfaces.Statement;
+import org.wikidata.wdtk.datamodel.interfaces.StatementGroup;
 
 /**
  * Jackson implementation of {@link ItemDocument}. Like all Jackson objects, it
@@ -93,7 +101,7 @@ public class JacksonItemDocument extends JacksonTermedStatementDocument
 	@JsonProperty("sitelinks")
 	@Override
 	public Map<String, SiteLink> getSiteLinks() {
-		return Collections.<String, SiteLink> unmodifiableMap(this.sitelinks);
+		return Collections.<String, SiteLink>unmodifiableMap(this.sitelinks);
 	}
 
 	@Override
@@ -109,5 +117,127 @@ public class JacksonItemDocument extends JacksonTermedStatementDocument
 	@Override
 	public String toString() {
 		return ToString.toString(this);
+	}
+
+	public static JacksonItemDocument fromItemDocumentImpl(final ItemDocumentImpl itemDocument) {
+
+		final JacksonItemDocument jacksonItemDocument = new JacksonItemDocument();
+		jacksonItemDocument.setLabels(transformMonolingualTextValues(itemDocument.getLabels()));
+		jacksonItemDocument.setDescriptions(transformMonolingualTextValues(itemDocument.getDescriptions()));
+		jacksonItemDocument.setAliases(transformMonolingualTextValueMaps(itemDocument.getAliases()));
+		jacksonItemDocument.setJsonClaims(transformClaims(itemDocument.getStatementGroups()));
+		jacksonItemDocument.setSiteLinks(transformSiteLinks(itemDocument.getSiteLinks()));
+
+		return jacksonItemDocument;
+	}
+
+	private static Map<String, JacksonMonolingualTextValue> transformMonolingualTextValues(
+			final Map<String, MonolingualTextValue> monolingualTextValues) {
+
+		if (monolingualTextValues == null) {
+
+			return null;
+		}
+
+		final Map<String, JacksonMonolingualTextValue> jacksonMonolingualTextValues = new HashMap<>();
+
+		for (final Map.Entry<String, MonolingualTextValue> monolingualTextValueEntry : monolingualTextValues.entrySet()) {
+
+			final String monolingualTextValueKey = monolingualTextValueEntry.getKey();
+			final MonolingualTextValue monolingualTextValue = monolingualTextValueEntry.getValue();
+
+			final JacksonMonolingualTextValue jacksonMonolingualTextValue = new JacksonMonolingualTextValue(monolingualTextValue);
+
+			jacksonMonolingualTextValues.put(monolingualTextValueKey, jacksonMonolingualTextValue);
+		}
+
+		return jacksonMonolingualTextValues;
+	}
+
+	private static Map<String, List<JacksonMonolingualTextValue>> transformMonolingualTextValueMaps(
+			final Map<String, List<MonolingualTextValue>> monolingualTextValueMaps) {
+
+		if (monolingualTextValueMaps == null) {
+
+			return null;
+		}
+
+		final Map<String, List<JacksonMonolingualTextValue>> jacksonMonolingualTextValues = new HashMap<>();
+
+		for (final Map.Entry<String, List<MonolingualTextValue>> monolingualTextValueEntry : monolingualTextValueMaps.entrySet()) {
+
+			final String monolingualTextValueKey = monolingualTextValueEntry.getKey();
+			final List<MonolingualTextValue> monolingualTextValues = monolingualTextValueEntry.getValue();
+
+			final List<JacksonMonolingualTextValue> jacksonMonolingualTextValueList = new ArrayList<>();
+
+			for (final MonolingualTextValue monolingualTextValue : monolingualTextValues) {
+
+				final JacksonMonolingualTextValue jacksonMonolingualTextValue = new JacksonMonolingualTextValue(monolingualTextValue);
+
+				jacksonMonolingualTextValueList.add(jacksonMonolingualTextValue);
+			}
+
+			jacksonMonolingualTextValues.put(monolingualTextValueKey, jacksonMonolingualTextValueList);
+		}
+
+		return jacksonMonolingualTextValues;
+	}
+
+	private static Map<String, List<JacksonStatement>> transformClaims(final List<StatementGroup> statementGroups) {
+
+		if (statementGroups == null) {
+
+			return null;
+		}
+
+		// TODO: are claims grouped by subject or property?
+		final Map<String, List<JacksonStatement>> jacksonClaims = new HashMap<>();
+
+		for (final StatementGroup statementGroup : statementGroups) {
+
+			final PropertyIdValue property = statementGroup.getProperty();
+
+			final List<Statement> statements = statementGroup.getStatements();
+
+			final List<JacksonStatement> jacksonStatements = new ArrayList<>();
+
+			if (statements != null) {
+
+				for (final Statement statement : statements) {
+
+					final JacksonStatement jacksonStatement = JacksonStatement.fromStatementImpl((StatementImpl) statement);
+
+					jacksonStatements.add(jacksonStatement);
+				}
+			}
+
+			// TODO id or iri
+			jacksonClaims.put(property.getId(), jacksonStatements);
+		}
+
+		return jacksonClaims;
+	}
+
+	private static Map<String, JacksonSiteLink> transformSiteLinks(final Map<String, SiteLink> siteLinks) {
+
+		if (siteLinks == null) {
+
+			return null;
+		}
+
+		final Map<String, JacksonSiteLink> jacksonSiteLinks = new HashMap<>();
+
+		for (final Map.Entry<String, SiteLink> siteLinkEntry : siteLinks.entrySet()) {
+
+			final String siteLinkKey = siteLinkEntry.getKey();
+			final SiteLink siteLink = siteLinkEntry.getValue();
+
+			final JacksonSiteLink jacksonSiteLink = JacksonSiteLink.fromSiteLinkImpl((SiteLinkImpl) siteLink);
+
+			jacksonSiteLinks.put(siteLinkKey, jacksonSiteLink);
+		}
+
+		return jacksonSiteLinks;
 	}
 }

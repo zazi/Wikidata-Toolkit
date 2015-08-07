@@ -70,7 +70,7 @@ public class ItemDocumentImpl extends TermedStatementDocumentImpl implements
 			List<StatementGroup> statementGroups,
 			Map<String, SiteLink> siteLinks) {
 		super(itemIdValue, labels, descriptions, aliases, statementGroups);
-		Validate.notNull(itemIdValue, "item ID cannot be null");
+		//Validate.notNull(itemIdValue, "item ID cannot be null");
 		Validate.notNull(siteLinks, "site links cannot be null");
 
 		this.itemId = itemIdValue;

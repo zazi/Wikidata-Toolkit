@@ -26,6 +26,7 @@ import java.util.List;
 import org.wikidata.wdtk.datamodel.helpers.Equality;
 import org.wikidata.wdtk.datamodel.helpers.Hash;
 import org.wikidata.wdtk.datamodel.helpers.ToString;
+import org.wikidata.wdtk.datamodel.implementation.SiteLinkImpl;
 import org.wikidata.wdtk.datamodel.interfaces.SiteLink;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -114,5 +115,15 @@ public class JacksonSiteLink implements SiteLink {
 	@Override
 	public String toString() {
 		return ToString.toString(this);
+	}
+
+	public static JacksonSiteLink fromSiteLinkImpl(final SiteLinkImpl siteLink) {
+
+		final JacksonSiteLink jacksonSiteLink = new JacksonSiteLink();
+		jacksonSiteLink.setPageTitle(siteLink.getPageTitle());
+		jacksonSiteLink.setSiteKey(siteLink.getSiteKey());
+		jacksonSiteLink.setBadges(siteLink.getBadges());
+
+		return jacksonSiteLink;
 	}
 }

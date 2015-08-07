@@ -62,7 +62,8 @@ public class StatementGroupImpl implements StatementGroup, Serializable {
 				.getPropertyId();
 
 		for (Statement s : statements) {
-			if (!subject.equals(s.getClaim().getSubject())) {
+			// note: subject can be null at entity creation time
+			if (subject != null && !subject.equals(s.getClaim().getSubject())) {
 				throw new IllegalArgumentException(
 						"All statements in a statement group must use the same subject");
 			}

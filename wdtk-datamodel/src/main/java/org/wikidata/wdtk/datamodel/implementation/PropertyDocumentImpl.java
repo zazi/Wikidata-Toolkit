@@ -73,7 +73,7 @@ public class PropertyDocumentImpl extends TermedStatementDocumentImpl implements
 			List<MonolingualTextValue> aliases,
 			List<StatementGroup> statementGroups, DatatypeIdValue datatypeId) {
 		super(propertyId, labels, descriptions, aliases, statementGroups);
-		Validate.notNull(propertyId, "property ID cannot be null");
+		//Validate.notNull(propertyId, "property ID cannot be null");
 		Validate.notNull(datatypeId, "datatype ID cannot be null");
 		this.propertyId = propertyId;
 		this.datatypeId = datatypeId;

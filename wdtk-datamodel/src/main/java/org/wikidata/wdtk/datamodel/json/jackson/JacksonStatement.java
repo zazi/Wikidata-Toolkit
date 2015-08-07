@@ -26,15 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.wikidata.wdtk.datamodel.helpers.Equality;
-import org.wikidata.wdtk.datamodel.helpers.Hash;
-import org.wikidata.wdtk.datamodel.helpers.ToString;
-import org.wikidata.wdtk.datamodel.interfaces.Claim;
-import org.wikidata.wdtk.datamodel.interfaces.EntityIdValue;
-import org.wikidata.wdtk.datamodel.interfaces.Reference;
-import org.wikidata.wdtk.datamodel.interfaces.Statement;
-import org.wikidata.wdtk.datamodel.interfaces.StatementRank;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -42,6 +33,20 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.wikidata.wdtk.datamodel.helpers.Equality;
+import org.wikidata.wdtk.datamodel.helpers.Hash;
+import org.wikidata.wdtk.datamodel.helpers.ToString;
+import org.wikidata.wdtk.datamodel.implementation.StatementImpl;
+import org.wikidata.wdtk.datamodel.implementation.ValueSnakImpl;
+import org.wikidata.wdtk.datamodel.interfaces.Claim;
+import org.wikidata.wdtk.datamodel.interfaces.EntityIdValue;
+import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue;
+import org.wikidata.wdtk.datamodel.interfaces.Reference;
+import org.wikidata.wdtk.datamodel.interfaces.Snak;
+import org.wikidata.wdtk.datamodel.interfaces.SnakGroup;
+import org.wikidata.wdtk.datamodel.interfaces.Statement;
+import org.wikidata.wdtk.datamodel.interfaces.StatementRank;
+import org.wikidata.wdtk.datamodel.interfaces.ValueSnak;
 
 /**
  * Jackson implementation of {@link Statement}. In JSON, the corresponding
@@ -93,12 +98,12 @@ public class JacksonStatement implements Statement {
 	/**
 	 * A map from property id strings to snaks that encodes the qualifiers.
 	 */
-	private Map<String, List<JacksonSnak>> qualifiers = new HashMap<>();
+	private Map<String, List<JacksonSnak>> qualifiers    = new HashMap<>();
 	/**
 	 * List of property string ids that encodes the desired order of qualifiers,
 	 * which is not specified by the map.
 	 */
-	private List<String> propertyOrder = Collections.<String> emptyList();
+	private List<String>                   propertyOrder = Collections.<String>emptyList();
 
 	/**
 	 * Constructor. Creates an empty object that can be populated during JSON
@@ -138,8 +143,7 @@ public class JacksonStatement implements Statement {
 	 * @see Claim#getSubject()
 	 * @return the subject of this statement
 	 */
-	@JsonIgnore
-	EntityIdValue getSubject() {
+	@JsonIgnore EntityIdValue getSubject() {
 		if (this.subject == null) {
 			throw new RuntimeException(
 					"Cannot retrieve subject for insufficiently initialised statement/claim.");
@@ -157,8 +161,7 @@ public class JacksonStatement implements Statement {
 	 * @param subject
 	 *            new value
 	 */
-	@JsonIgnore
-	void setSubject(EntityIdValue subject) {
+	@JsonIgnore void setSubject(EntityIdValue subject) {
 		this.subject = subject;
 
 		this.mainsnak.setSiteIri(subject.getSiteIri());
@@ -314,5 +317,66 @@ public class JacksonStatement implements Statement {
 	@Override
 	public String toString() {
 		return ToString.toString(this);
+	}
+
+	public static JacksonStatement fromStatementImpl(final StatementImpl statement) {
+
+		final Claim claim = statement.getClaim();
+		final Snak mainSnak = claim.getMainSnak();
+
+		final JacksonStatement jacksonStatement = new JacksonStatement();
+
+		final JacksonSnak jacksonSnak = transformSnak(mainSnak);
+
+		jacksonStatement.setMainsnak(jacksonSnak);
+		jacksonStatement.setRank(statement.getRank());
+		jacksonStatement.setQualifiers(transformQualifiers(claim.getQualifiers()));
+		//jacksonStatement.setReferences();
+
+		return jacksonStatement;
+	}
+
+	private static Map<String, List<JacksonSnak>> transformQualifiers(final List<SnakGroup> snakGroups) {
+
+		if (snakGroups == null) {
+
+			return null;
+		}
+
+		final Map<String, List<JacksonSnak>> jacksonSnakMap = new HashMap<>();
+
+		for (final SnakGroup snakGroup : snakGroups) {
+
+			final PropertyIdValue property = snakGroup.getProperty();
+
+			final List<Snak> snaks = snakGroup.getSnaks();
+			final List<JacksonSnak> jacksonSnaks = new ArrayList<>();
+
+			for (final Snak snak : snaks) {
+
+				final JacksonSnak jacksonSnak = transformSnak(snak);
+
+				jacksonSnaks.add(jacksonSnak);
+			}
+
+			// TODO: id or iri as key
+			jacksonSnakMap.put(property.getId(), jacksonSnaks);
+		}
+
+		return jacksonSnakMap;
+	}
+
+	private static JacksonSnak transformSnak(final Snak mainSnak) {
+
+		if (ValueSnak.class.isInstance(mainSnak)) {
+
+			final ValueSnak valueSnak = (ValueSnak) mainSnak;
+
+			return JacksonValueSnak.fromValueSnakIml((ValueSnakImpl) valueSnak);
+		}
+
+		// TODO: support other snak types
+
+		return null;
 	}
 }

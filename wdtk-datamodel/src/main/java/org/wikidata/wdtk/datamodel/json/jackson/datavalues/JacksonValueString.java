@@ -1,15 +1,15 @@
 package org.wikidata.wdtk.datamodel.json.jackson.datavalues;
 
-import org.wikidata.wdtk.datamodel.helpers.Equality;
-import org.wikidata.wdtk.datamodel.helpers.Hash;
-import org.wikidata.wdtk.datamodel.helpers.ToString;
-import org.wikidata.wdtk.datamodel.interfaces.StringValue;
-import org.wikidata.wdtk.datamodel.interfaces.ValueVisitor;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonDeserializer.None;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.wikidata.wdtk.datamodel.helpers.Equality;
+import org.wikidata.wdtk.datamodel.helpers.Hash;
+import org.wikidata.wdtk.datamodel.helpers.ToString;
+import org.wikidata.wdtk.datamodel.implementation.StringValueImpl;
+import org.wikidata.wdtk.datamodel.interfaces.StringValue;
+import org.wikidata.wdtk.datamodel.interfaces.ValueVisitor;
 
 /*
  * #%L
@@ -95,5 +95,13 @@ public class JacksonValueString extends JacksonValue implements StringValue {
 	@Override
 	public String toString() {
 		return ToString.toString(this);
+	}
+
+	public static JacksonValueString fromStringValueImpl(final StringValueImpl stringValue) {
+
+		final JacksonValueString jacksonValueString = new JacksonValueString();
+		jacksonValueString.setValue(stringValue.getString());
+
+		return jacksonValueString;
 	}
 }

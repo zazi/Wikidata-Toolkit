@@ -24,6 +24,7 @@ import org.wikidata.wdtk.datamodel.helpers.Datamodel;
 import org.wikidata.wdtk.datamodel.helpers.Equality;
 import org.wikidata.wdtk.datamodel.helpers.Hash;
 import org.wikidata.wdtk.datamodel.helpers.ToString;
+import org.wikidata.wdtk.datamodel.implementation.PropertyDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.DatatypeIdValue;
 import org.wikidata.wdtk.datamodel.interfaces.EntityIdValue;
 import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
@@ -119,5 +120,13 @@ public class JacksonPropertyDocument extends JacksonTermedStatementDocument
 	@Override
 	public String toString() {
 		return ToString.toString(this);
+	}
+
+	public static JacksonPropertyDocument fromPropertyDocumentImpl(final PropertyDocumentImpl propertyDocument) {
+
+		final JacksonPropertyDocument jacksonPropertyDocument = new JacksonPropertyDocument();
+		jacksonPropertyDocument.setJsonDatatype(propertyDocument.getDatatype().getIri());
+
+		return jacksonPropertyDocument;
 	}
 }

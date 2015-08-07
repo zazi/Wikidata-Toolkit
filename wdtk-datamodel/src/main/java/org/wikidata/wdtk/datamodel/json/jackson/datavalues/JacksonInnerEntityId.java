@@ -153,5 +153,4 @@ public class JacksonInnerEntityId {
 				&& (this.entityType
 						.equals(((JacksonInnerEntityId) o).entityType));
 	}
-
 }

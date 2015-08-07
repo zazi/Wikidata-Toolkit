@@ -20,17 +20,23 @@ package org.wikidata.wdtk.datamodel.json.jackson;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.wikidata.wdtk.datamodel.helpers.Equality;
 import org.wikidata.wdtk.datamodel.helpers.Hash;
 import org.wikidata.wdtk.datamodel.helpers.ToString;
+import org.wikidata.wdtk.datamodel.implementation.ItemIdValueImpl;
+import org.wikidata.wdtk.datamodel.implementation.StringValueImpl;
+import org.wikidata.wdtk.datamodel.implementation.ValueSnakImpl;
+import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue;
 import org.wikidata.wdtk.datamodel.interfaces.SnakVisitor;
+import org.wikidata.wdtk.datamodel.interfaces.StringValue;
 import org.wikidata.wdtk.datamodel.interfaces.Value;
 import org.wikidata.wdtk.datamodel.interfaces.ValueSnak;
 import org.wikidata.wdtk.datamodel.json.jackson.datavalues.JacksonValue;
 import org.wikidata.wdtk.datamodel.json.jackson.datavalues.JacksonValueEntityId;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import org.wikidata.wdtk.datamodel.json.jackson.datavalues.JacksonValueItemId;
+import org.wikidata.wdtk.datamodel.json.jackson.datavalues.JacksonValueString;
 
 /**
  * Jackson implementation of {@link ValueSnak}.
@@ -109,8 +115,7 @@ public class JacksonValueSnak extends JacksonSnak implements ValueSnak {
 		return this.datavalue;
 	}
 
-	@Override
-	void setSiteIri(String siteIri) {
+	@Override void setSiteIri(String siteIri) {
 		super.setSiteIri(siteIri);
 		if (this.datavalue instanceof JacksonValueEntityId) {
 			((JacksonValueEntityId) this.datavalue).setSiteIri(siteIri);
@@ -136,5 +141,46 @@ public class JacksonValueSnak extends JacksonSnak implements ValueSnak {
 	@Override
 	public String toString() {
 		return ToString.toString(this);
+	}
+
+	public static JacksonValueSnak fromValueSnakIml(final ValueSnakImpl valueSnak) {
+
+		final JacksonValueSnak jacksonValueSnak = new JacksonValueSnak();
+
+		final Value value = valueSnak.getValue();
+
+		final JacksonValue jacksonValue;
+		final String dataType;
+
+		if (StringValue.class.isInstance(value)) {
+
+			final StringValue stringValue = (StringValue) value;
+
+			// create JacksonValueString
+			jacksonValue = JacksonValueString.fromStringValueImpl((StringValueImpl) stringValue);
+
+			dataType = JacksonValue.JSON_VALUE_TYPE_ENTITY_ID;
+		} else if (ItemIdValue.class.isInstance(value)) {
+
+			final ItemIdValue itemIdValue = (ItemIdValue) value;
+
+			// create JacksonValueItemId
+			jacksonValue = JacksonValueItemId.fromItemIdValueImpl((ItemIdValueImpl) itemIdValue);
+			jacksonValueSnak.setSiteIri(itemIdValue.getSiteIri());
+
+			dataType = JacksonValue.JSON_VALUE_TYPE_STRING;
+		} else {
+
+			// TODO: support other value types
+
+			jacksonValue = null;
+			dataType = null;
+		}
+
+		jacksonValueSnak.setDatavalue(jacksonValue);
+		jacksonValueSnak.setProperty(valueSnak.getPropertyId().getIri());
+		jacksonValueSnak.setDatatype(dataType);
+
+		return jacksonValueSnak;
 	}
 }
