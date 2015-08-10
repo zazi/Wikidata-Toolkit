@@ -63,7 +63,7 @@ public abstract class NumericEntityIdValueImpl implements EntityIdValue,
 	 *            "http://www.wikidata.org/entity/"
 	 */
 	NumericEntityIdValueImpl(int id, String siteIri) {
-		Validate.notNull(siteIri, "Entity site IRIs cannot be null");
+		//Validate.notNull(siteIri, "Entity site IRIs cannot be null");
 		this.id = id;
 		this.siteIri = siteIri;
 	}
