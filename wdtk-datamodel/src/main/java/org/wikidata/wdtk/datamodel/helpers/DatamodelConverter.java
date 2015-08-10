@@ -248,6 +248,12 @@ public class DatamodelConverter implements SnakVisitor<Snak>,
 	 * @return copied object
 	 */
 	public ItemIdValue copy(ItemIdValue object) {
+
+		if(object == null) {
+
+			return null;
+		}
+
 		return this.dataObjectFactory.getItemIdValue(object.getId(),
 				object.getSiteIri());
 	}
@@ -260,6 +266,12 @@ public class DatamodelConverter implements SnakVisitor<Snak>,
 	 * @return copied object
 	 */
 	public PropertyIdValue copy(PropertyIdValue object) {
+
+		if(object == null) {
+
+			return null;
+		}
+
 		return this.dataObjectFactory.getPropertyIdValue(object.getId(),
 				object.getSiteIri());
 	}
@@ -580,6 +592,12 @@ public class DatamodelConverter implements SnakVisitor<Snak>,
 
 	@Override
 	public Value visit(EntityIdValue value) {
+
+		if(value == null) {
+
+			return null;
+		}
+
 		if (value instanceof ItemIdValue) {
 			return copy((ItemIdValue) value);
 		} else if (value instanceof PropertyIdValue) {

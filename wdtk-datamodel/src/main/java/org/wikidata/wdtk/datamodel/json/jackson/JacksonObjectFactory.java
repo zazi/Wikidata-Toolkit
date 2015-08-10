@@ -225,7 +225,7 @@ public class JacksonObjectFactory implements DataObjectFactory {
 		// Jackson claims cannot exist without a statement.
 		Statement statement = getStatement(
 				Datamodel.makeClaim(subject, mainSnak, qualifiers),
-				Collections.<Reference> emptyList(), StatementRank.NORMAL,
+				Collections.<Reference>emptyList(), StatementRank.NORMAL,
 				"empty id 12345");
 		return statement.getClaim();
 	}
@@ -284,7 +284,12 @@ public class JacksonObjectFactory implements DataObjectFactory {
 		result.setRank(rank);
 		result.setStatementId(statementId);
 
-		result.setSubject(claim.getSubject());
+		final EntityIdValue subject = claim.getSubject();
+
+		if (subject != null) {
+
+			result.setSubject(subject);
+		}
 
 		return result;
 	}
@@ -318,7 +323,7 @@ public class JacksonObjectFactory implements DataObjectFactory {
 			List<MonolingualTextValue> descriptions,
 			List<MonolingualTextValue> aliases, DatatypeIdValue datatypeId) {
 		return getPropertyDocument(propertyId, labels, descriptions, aliases,
-				Collections.<StatementGroup> emptyList(), datatypeId);
+				Collections.<StatementGroup>emptyList(), datatypeId);
 	}
 
 	@Override
@@ -332,36 +337,36 @@ public class JacksonObjectFactory implements DataObjectFactory {
 				descriptions, aliases, statementGroups);
 
 		switch (datatypeId.getIri()) {
-		case DatatypeIdValue.DT_ITEM:
-			result.setJsonDatatype(JacksonDatatypeId.JSON_DT_ITEM);
-			break;
-		case DatatypeIdValue.DT_GLOBE_COORDINATES:
-			result.setJsonDatatype(JacksonDatatypeId.JSON_DT_GLOBE_COORDINATES);
-			break;
-		case DatatypeIdValue.DT_URL:
-			result.setJsonDatatype(JacksonDatatypeId.JSON_DT_URL);
-			break;
-		case DatatypeIdValue.DT_COMMONS_MEDIA:
-			result.setJsonDatatype(JacksonDatatypeId.JSON_DT_COMMONS_MEDIA);
-			break;
-		case DatatypeIdValue.DT_TIME:
-			result.setJsonDatatype(JacksonDatatypeId.JSON_DT_TIME);
-			break;
-		case DatatypeIdValue.DT_QUANTITY:
-			result.setJsonDatatype(JacksonDatatypeId.JSON_DT_QUANTITY);
-			break;
-		case DatatypeIdValue.DT_STRING:
-			result.setJsonDatatype(JacksonDatatypeId.JSON_DT_STRING);
-			break;
-		case DatatypeIdValue.DT_MONOLINGUAL_TEXT:
-			result.setJsonDatatype(JacksonDatatypeId.JSON_DT_MONOLINGUAL_TEXT);
-			break;
-		case DatatypeIdValue.DT_PROPERTY:
-			result.setJsonDatatype(JacksonDatatypeId.JSON_DT_PROPERTY);
-			break;
-		default:
-			throw new IllegalArgumentException("Unknown datatype: "
-					+ datatypeId.getIri());
+			case DatatypeIdValue.DT_ITEM:
+				result.setJsonDatatype(JacksonDatatypeId.JSON_DT_ITEM);
+				break;
+			case DatatypeIdValue.DT_GLOBE_COORDINATES:
+				result.setJsonDatatype(JacksonDatatypeId.JSON_DT_GLOBE_COORDINATES);
+				break;
+			case DatatypeIdValue.DT_URL:
+				result.setJsonDatatype(JacksonDatatypeId.JSON_DT_URL);
+				break;
+			case DatatypeIdValue.DT_COMMONS_MEDIA:
+				result.setJsonDatatype(JacksonDatatypeId.JSON_DT_COMMONS_MEDIA);
+				break;
+			case DatatypeIdValue.DT_TIME:
+				result.setJsonDatatype(JacksonDatatypeId.JSON_DT_TIME);
+				break;
+			case DatatypeIdValue.DT_QUANTITY:
+				result.setJsonDatatype(JacksonDatatypeId.JSON_DT_QUANTITY);
+				break;
+			case DatatypeIdValue.DT_STRING:
+				result.setJsonDatatype(JacksonDatatypeId.JSON_DT_STRING);
+				break;
+			case DatatypeIdValue.DT_MONOLINGUAL_TEXT:
+				result.setJsonDatatype(JacksonDatatypeId.JSON_DT_MONOLINGUAL_TEXT);
+				break;
+			case DatatypeIdValue.DT_PROPERTY:
+				result.setJsonDatatype(JacksonDatatypeId.JSON_DT_PROPERTY);
+				break;
+			default:
+				throw new IllegalArgumentException("Unknown datatype: "
+						+ datatypeId.getIri());
 		}
 
 		return result;
@@ -402,8 +407,14 @@ public class JacksonObjectFactory implements DataObjectFactory {
 			List<MonolingualTextValue> aliases,
 			List<StatementGroup> statementGroups) {
 
-		document.setJsonId(entityIdValue.getId());
-		document.setSiteIri(entityIdValue.getSiteIri());
+		if (entityIdValue != null) {
+
+			document.setJsonId(entityIdValue.getId());
+			document.setSiteIri(entityIdValue.getSiteIri());
+		} else {
+
+			document.setJsonId(null);
+		}
 
 		Map<String, List<JacksonMonolingualTextValue>> aliasMap = new HashMap<>();
 		for (MonolingualTextValue mltv : aliases) {

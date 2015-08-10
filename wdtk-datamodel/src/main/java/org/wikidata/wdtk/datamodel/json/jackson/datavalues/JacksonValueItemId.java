@@ -91,10 +91,15 @@ public class JacksonValueItemId extends JacksonValueEntityId implements
 
 		final JacksonValueItemId jacksonValueItemId = new JacksonValueItemId();
 
-		final JacksonInnerEntityId jacksonInnerEntityId = new JacksonInnerEntityId(itemIdValue.getEntityType(), Integer.valueOf(itemIdValue.getId()));
+		final String itemIdString = itemIdValue.getId();
+		// remove item pr property prefix
+		final String itemIdSubstring = itemIdString.substring(1, itemIdString.length());
+
+		final String entityType = JacksonInnerEntityId.JSON_ENTITY_TYPE_ITEM;
+
+		final JacksonInnerEntityId jacksonInnerEntityId = new JacksonInnerEntityId(entityType, Integer.valueOf(itemIdSubstring));
 
 		jacksonValueItemId.setValue(jacksonInnerEntityId);
-		jacksonValueItemId.setType(itemIdValue.getEntityType());
 		jacksonValueItemId.setSiteIri(itemIdValue.getSiteIri());
 
 		return jacksonValueItemId;

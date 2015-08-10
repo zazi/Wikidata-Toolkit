@@ -29,6 +29,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.wikidata.wdtk.datamodel.helpers.Datamodel;
 import org.wikidata.wdtk.datamodel.helpers.DatamodelConverter;
 import org.wikidata.wdtk.datamodel.helpers.Equality;
@@ -62,6 +63,7 @@ public class JacksonItemDocument extends JacksonTermedStatementDocument
 	/**
 	 * Map to store site links.
 	 */
+	@JsonDeserialize(using = JacksonSiteLinkArrayMapDeserializer.class)
 	private Map<String, JacksonSiteLink> sitelinks = new HashMap<>();
 
 	/**

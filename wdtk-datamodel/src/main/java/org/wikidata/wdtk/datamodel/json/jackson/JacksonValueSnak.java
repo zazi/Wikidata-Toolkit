@@ -178,7 +178,7 @@ public class JacksonValueSnak extends JacksonSnak implements ValueSnak {
 		}
 
 		jacksonValueSnak.setDatavalue(jacksonValue);
-		jacksonValueSnak.setProperty(valueSnak.getPropertyId().getIri());
+		jacksonValueSnak.setProperty(valueSnak.getPropertyId().getId());
 		jacksonValueSnak.setDatatype(dataType);
 
 		return jacksonValueSnak;

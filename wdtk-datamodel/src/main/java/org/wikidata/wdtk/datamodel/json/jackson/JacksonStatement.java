@@ -33,6 +33,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wikidata.wdtk.datamodel.helpers.Equality;
 import org.wikidata.wdtk.datamodel.helpers.Hash;
 import org.wikidata.wdtk.datamodel.helpers.ToString;
@@ -62,6 +64,8 @@ import org.wikidata.wdtk.datamodel.interfaces.ValueSnak;
 @JsonInclude(Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class JacksonStatement implements Statement {
+
+	private static final Logger LOG = LoggerFactory.getLogger(JacksonStatement.class);
 
 	/**
 	 * Id of this statement.
@@ -145,8 +149,15 @@ public class JacksonStatement implements Statement {
 	 */
 	@JsonIgnore EntityIdValue getSubject() {
 		if (this.subject == null) {
-			throw new RuntimeException(
-					"Cannot retrieve subject for insufficiently initialised statement/claim.");
+
+			final String message = "Cannot retrieve subject for insufficiently initialised statement/claim.";
+
+			LOG.debug(message);
+
+			//throw new RuntimeException(message);
+
+			// do not return RE right now, since subjects are empty at item creation right now (let's see whether this works out, or not)
+			return this.subject;
 		} else {
 			return this.subject;
 		}

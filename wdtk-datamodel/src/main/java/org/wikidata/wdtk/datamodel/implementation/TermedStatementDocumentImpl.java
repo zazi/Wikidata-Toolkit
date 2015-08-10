@@ -116,7 +116,7 @@ public abstract class TermedStatementDocumentImpl implements TermedDocument,
 
 		if (!statementGroups.isEmpty()) {
 			for (StatementGroup sg : statementGroups) {
-				if (!entityIdValue.equals(sg.getSubject())) {
+				if (entityIdValue != null && !entityIdValue.equals(sg.getSubject())) {
 					throw new IllegalArgumentException(
 							"All statement groups in a document must have the same subject: found "
 									+ sg.getSubject() + " but expected "
