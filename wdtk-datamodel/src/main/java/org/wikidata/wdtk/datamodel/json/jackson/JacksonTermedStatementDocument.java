@@ -70,13 +70,18 @@ public abstract class JacksonTermedStatementDocument implements TermedDocument,
 
 	@JsonDeserialize(using = AliasesDeserializer.class)
 	protected Map<String, List<JacksonMonolingualTextValue>> aliases = new HashMap<>();
+
+	@JsonDeserialize(using = JacksonMonolingualTextValueArrayMapDeserializer.class)
 	protected Map<String, JacksonMonolingualTextValue> labels = new HashMap<>();
+
+	@JsonDeserialize(using = JacksonMonolingualTextValueArrayMapDeserializer.class)
 	protected Map<String, JacksonMonolingualTextValue> descriptions = new HashMap<>();
 
 	/**
 	 * This is what is called <i>claim</i> in the JSON model. It corresponds to
 	 * the statement group in the WDTK model.
 	 */
+	@JsonDeserialize(using = ListJacksonStatementArrayMapDeserializer.class)
 	private Map<String, List<JacksonStatement>> claims = new HashMap<>();
 
 	/**
