@@ -20,6 +20,8 @@ package org.wikidata.wdtk.datamodel.json.jackson.datavalues;
  * #L%
  */
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wikidata.wdtk.datamodel.interfaces.EntityIdValue;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,6 +34,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public abstract class JacksonValueEntityId extends JacksonValue implements
 		EntityIdValue {
+
+	private static final Logger LOG = LoggerFactory.getLogger(JacksonValueEntityId.class);
 
 	/**
 	 * The site IRI that this value refers to. This data not part of the JSON
@@ -93,11 +97,20 @@ public abstract class JacksonValueEntityId extends JacksonValue implements
 	@JsonIgnore
 	@Override
 	public String getSiteIri() {
+
 		if (this.siteIri != null) {
+
 			return this.siteIri;
 		} else {
-			throw new RuntimeException(
-					"Cannot access the site IRI id of an insufficiently initialised Jackson value.");
+
+			final String message = "Cannot access the site IRI id of an insufficiently initialised Jackson value.";
+
+			LOG.debug(message);
+
+			//throw new RuntimeException(message);
+
+			// do not return RE right now, since site IRIs are empty at item modification right now (let's see whether this works out, or not)
+			return this.siteIri;
 		}
 	}
 

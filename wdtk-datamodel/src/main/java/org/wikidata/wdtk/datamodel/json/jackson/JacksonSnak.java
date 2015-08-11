@@ -20,15 +20,16 @@ package org.wikidata.wdtk.datamodel.json.jackson;
  * #L%
  */
 
-import org.wikidata.wdtk.datamodel.helpers.Datamodel;
-import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue;
-import org.wikidata.wdtk.datamodel.interfaces.Snak;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wikidata.wdtk.datamodel.helpers.Datamodel;
+import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue;
+import org.wikidata.wdtk.datamodel.interfaces.Snak;
 
 /**
  * Abstract Jackson implementation of {@link Snak}.
@@ -44,10 +45,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class JacksonSnak implements Snak {
 
+	private static final Logger LOG = LoggerFactory.getLogger(JacksonSnak.class);
+
 	/**
 	 * Type string used to denote value snaks in JSON.
 	 */
-	public static final String JSON_SNAK_TYPE_VALUE = "value";
+	public static final String JSON_SNAK_TYPE_VALUE     = "value";
 	/**
 	 * Type string used to denote somevalue snaks in JSON.
 	 */
@@ -55,7 +58,7 @@ public abstract class JacksonSnak implements Snak {
 	/**
 	 * Type string used to denote novalue snaks in JSON.
 	 */
-	public static final String JSON_SNAK_TYPE_NOVALUE = "novalue";
+	public static final String JSON_SNAK_TYPE_NOVALUE   = "novalue";
 
 	/**
 	 * Value of the "property" field in JSON, e.g., "P31".
@@ -102,12 +105,21 @@ public abstract class JacksonSnak implements Snak {
 	@JsonIgnore
 	@Override
 	public PropertyIdValue getPropertyId() {
+
 		if (this.siteIri != null) {
+
 			return Datamodel.makePropertyIdValue(property, this.siteIri);
 		} else {
-			throw new RuntimeException(
-					"Cannot access the property id of an insufficiently initialised Jackson snak.");
+
+			final String message = "Cannot access the property id of an insufficiently initialised Jackson snak.";
+
+			LOG.debug(message);
+
+			// throw new RuntimeException(message);
 			// return Datamodel.makeWikidataPropertyIdValue(property);
+
+			// do not return RE right now, since site IRIs are empty at property modification right now (let's see whether this works out, or not)
+			return Datamodel.makePropertyIdValue(property, null);
 		}
 	}
 
@@ -120,8 +132,7 @@ public abstract class JacksonSnak implements Snak {
 	 * @param parentDocument
 	 *            new value
 	 */
-	@JsonIgnore
-	void setSiteIri(String siteIri) {
+	@JsonIgnore void setSiteIri(String siteIri) {
 		this.siteIri = siteIri;
 	}
 
