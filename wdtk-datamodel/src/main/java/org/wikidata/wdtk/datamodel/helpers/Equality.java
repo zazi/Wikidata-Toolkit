@@ -79,7 +79,8 @@ public class Equality {
 
 		EntityIdValue other = (EntityIdValue) o2;
 		return o1.getId().equals(other.getId())
-				&& o1.getSiteIri().equals(other.getSiteIri())
+				&& ((o1.getSiteIri() == null && other.getSiteIri() == null) || (o1.getSiteIri() != null && o1.getSiteIri()
+				.equals(other.getSiteIri())))
 				&& o1.getEntityType().equals(other.getEntityType());
 	}
 
@@ -140,7 +141,7 @@ public class Equality {
 				&& o1.getAfterTolerance() == other.getAfterTolerance()
 				&& o1.getTimezoneOffset() == other.getTimezoneOffset()
 				&& o1.getPreferredCalendarModel().equals(
-						other.getPreferredCalendarModel());
+				other.getPreferredCalendarModel());
 	}
 
 	/**
